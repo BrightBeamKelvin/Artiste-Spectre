@@ -5,38 +5,27 @@ import { BeliefsSection } from '@/components/BeliefsSection';
 import { PillarsSection } from '@/components/PillarsSection';
 import { FooterSection } from '@/components/FooterSection';
 import { ChromaticSection } from '@/components/ChromaticSection';
-import { DatamoshDivider } from '@/components/DatamoshDivider';
-import { SVGFilters } from '@/components/SVGFilters';
 
 const Index = () => {
   return (
     <main className="bg-background text-foreground min-h-screen overflow-x-hidden">
-      <SVGFilters />
       <CursorTrail />
       
-      <ChromaticSection intensity={0.8}>
+      <ChromaticSection intensity={1}>
         <HeroSection />
       </ChromaticSection>
       
-      <DatamoshDivider />
-      
-      <ChromaticSection intensity={1.2}>
+      <ChromaticSection intensity={1.5}>
         <ManifestoSection />
       </ChromaticSection>
       
-      <DatamoshDivider />
-      
-      <ChromaticSection intensity={1}>
+      <ChromaticSection intensity={1.2}>
         <BeliefsSection />
       </ChromaticSection>
       
-      <DatamoshDivider />
-      
-      <ChromaticSection intensity={1.5}>
+      <ChromaticSection intensity={2}>
         <PillarsSection />
       </ChromaticSection>
-      
-      <DatamoshDivider />
       
       <FooterSection />
     </main>
