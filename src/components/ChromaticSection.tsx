@@ -1,5 +1,5 @@
-import { useRef, ReactNode } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef, ReactNode, useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
 interface ChromaticSectionProps {
   children: ReactNode;
@@ -13,56 +13,79 @@ export const ChromaticSection = ({
   intensity = 1 
 }: ChromaticSectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
   });
 
-  // Chromatic aberration offsets - prism color split
-  const redX = useTransform(scrollYProgress, [0, 0.5, 1], [-2 * intensity, 0, 2 * intensity]);
-  const blueX = useTransform(scrollYProgress, [0, 0.5, 1], [2 * intensity, 0, -2 * intensity]);
-  const greenY = useTransform(scrollYProgress, [0, 0.5, 1], [1 * intensity, 0, -1 * intensity]);
+  // Smooth spring for aberration
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+
+  // More pronounced chromatic splits
+  const redX = useTransform(smoothProgress, [0, 0.5, 1], [-6 * intensity, 0, 6 * intensity]);
+  const redY = useTransform(smoothProgress, [0, 0.5, 1], [-2 * intensity, 0, 2 * intensity]);
+  const blueX = useTransform(smoothProgress, [0, 0.5, 1], [6 * intensity, 0, -6 * intensity]);
+  const blueY = useTransform(smoothProgress, [0, 0.5, 1], [2 * intensity, 0, -2 * intensity]);
+  
+  // Parallax for main content
+  const contentY = useTransform(smoothProgress, [0, 1], [30, -30]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div ref={ref} className={`relative ${className}`}>
-      {/* Red channel - offset left/right */}
+      {/* Red/Cyan ghost - left offset */}
       <motion.div 
-        className="absolute inset-0 mix-blend-screen opacity-[0.15] pointer-events-none"
+        className="absolute inset-0 pointer-events-none select-none"
         style={{ 
           x: redX,
-          filter: 'url(#redChannel)'
+          y: redY,
+          opacity: isInView ? 0.4 : 0,
+          color: 'rgb(255, 80, 80)',
+          mixBlendMode: 'screen',
+          transition: 'opacity 0.3s ease'
         }}
+        aria-hidden="true"
       >
-        {children}
+        <div style={{ filter: 'blur(0.5px)' }}>
+          {children}
+        </div>
       </motion.div>
       
-      {/* Blue channel - offset opposite */}
+      {/* Blue ghost - right offset */}
       <motion.div 
-        className="absolute inset-0 mix-blend-screen opacity-[0.15] pointer-events-none"
+        className="absolute inset-0 pointer-events-none select-none"
         style={{ 
           x: blueX,
-          filter: 'url(#blueChannel)'
+          y: blueY,
+          opacity: isInView ? 0.35 : 0,
+          color: 'rgb(80, 120, 255)',
+          mixBlendMode: 'screen',
+          transition: 'opacity 0.3s ease'
         }}
+        aria-hidden="true"
       >
-        {children}
+        <div style={{ filter: 'blur(0.5px)' }}>
+          {children}
+        </div>
       </motion.div>
       
-      {/* Green channel - slight vertical offset */}
+      {/* Main content with subtle parallax */}
       <motion.div 
-        className="absolute inset-0 mix-blend-screen opacity-[0.08] pointer-events-none"
-        style={{ 
-          y: greenY,
-          filter: 'url(#greenChannel)'
-        }}
+        className="relative"
+        style={{ y: contentY }}
       >
         {children}
       </motion.div>
-      
-      {/* Main content */}
-      <div className="relative">
-        {children}
-      </div>
     </div>
   );
 };
