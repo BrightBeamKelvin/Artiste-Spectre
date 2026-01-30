@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 interface TypewriterTextProps {
@@ -18,8 +18,13 @@ export const TypewriterText = ({
 }: TypewriterTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+  const hasStarted = useRef(false);
 
   useEffect(() => {
+    // Prevent re-running if already started
+    if (hasStarted.current) return;
+    hasStarted.current = true;
+
     const timeout = setTimeout(() => {
       let currentIndex = 0;
       const interval = setInterval(() => {
@@ -37,7 +42,7 @@ export const TypewriterText = ({
     }, delay);
 
     return () => clearTimeout(timeout);
-  }, [text, delay, speed, onComplete]);
+  }, []); // Empty deps - only run once
 
   return (
     <span className={className}>
