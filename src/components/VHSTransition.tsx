@@ -16,18 +16,18 @@ export const VHSTransition = ({ isActive, onComplete }: VHSTransitionProps) => {
       // Hold phase - show text
       const holdTimer = setTimeout(() => setPhase('hold'), 400);
       
-      // Out phase - fade out
-      const outTimer = setTimeout(() => setPhase('out'), 1200);
-      
-      // Complete - trigger navigation
-      const completeTimer = setTimeout(() => {
+      // Navigate while screen is covered (during hold phase)
+      const navigateTimer = setTimeout(() => {
         onComplete();
-      }, 1600);
+      }, 800);
+      
+      // Out phase - fade out AFTER navigation
+      const outTimer = setTimeout(() => setPhase('out'), 1000);
 
       return () => {
         clearTimeout(holdTimer);
+        clearTimeout(navigateTimer);
         clearTimeout(outTimer);
-        clearTimeout(completeTimer);
       };
     }
   }, [isActive, onComplete]);

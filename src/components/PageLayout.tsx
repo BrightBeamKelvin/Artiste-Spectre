@@ -26,7 +26,8 @@ export const PageLayout = ({ children }: PageLayoutProps) => {
       navigate(pendingPath);
       setPendingPath(null);
     }
-    setIsTransitioning(false);
+    // Keep transition active briefly for fade-out
+    setTimeout(() => setIsTransitioning(false), 400);
   }, [navigate, pendingPath]);
 
   return (
