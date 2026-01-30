@@ -23,41 +23,60 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
   };
 
   return (
-    <nav className="fixed top-6 right-6 md:right-12 z-50">
-      <ul className="flex gap-6 md:gap-8">
-        {navItems.map((item, index) => (
-          <motion.li
-            key={item.path}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-          >
-            <Link
-              to={item.path}
-              onClick={(e) => handleClick(e, item.path)}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              className={`scene-heading relative transition-colors duration-300 ${
-                location.pathname === item.path
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+    <>
+      {/* Left side - Brand */}
+      <motion.div
+        className="fixed top-6 left-6 md:left-12 z-50"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <Link
+          to="/"
+          onClick={(e) => handleClick(e, '/')}
+          className="scene-heading text-foreground tracking-[0.2em] hover:text-muted-foreground transition-colors duration-300"
+        >
+          ARTISTE SPECTRE
+        </Link>
+      </motion.div>
+
+      {/* Right side - Navigation */}
+      <nav className="fixed top-6 right-6 md:right-12 z-50">
+        <ul className="flex gap-6 md:gap-8">
+          {navItems.map((item, index) => (
+            <motion.li
+              key={item.path}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
             >
-              {item.label}
-              <motion.span
-                className="absolute -bottom-1 left-0 h-px bg-foreground"
-                initial={{ width: 0 }}
-                animate={{ 
-                  width: hoveredIndex === index || location.pathname === item.path 
-                    ? '100%' 
-                    : 0 
-                }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              />
-            </Link>
-          </motion.li>
-        ))}
-      </ul>
-    </nav>
+              <Link
+                to={item.path}
+                onClick={(e) => handleClick(e, item.path)}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                className={`scene-heading relative transition-colors duration-300 ${
+                  location.pathname === item.path
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.label}
+                <motion.span
+                  className="absolute -bottom-1 left-0 h-px bg-foreground"
+                  initial={{ width: 0 }}
+                  animate={{ 
+                    width: hoveredIndex === index || location.pathname === item.path 
+                      ? '100%' 
+                      : 0 
+                  }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                />
+              </Link>
+            </motion.li>
+          ))}
+        </ul>
+      </nav>
+    </>
   );
 };
