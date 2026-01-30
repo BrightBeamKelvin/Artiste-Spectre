@@ -1,4 +1,3 @@
-import { CursorTrail } from '@/components/CursorTrail';
 import { HeroSection } from '@/components/HeroSection';
 import { ManifestoSection } from '@/components/ManifestoSection';
 import { BeliefsSection } from '@/components/BeliefsSection';
@@ -8,9 +7,7 @@ import { ChromaticSection } from '@/components/ChromaticSection';
 
 const Index = () => {
   return (
-    <main className="bg-background text-foreground min-h-screen overflow-x-hidden">
-      <CursorTrail />
-      
+    <>
       <ChromaticSection intensity={1}>
         <HeroSection />
       </ChromaticSection>
@@ -28,7 +25,7 @@ const Index = () => {
       </ChromaticSection>
       
       <FooterSection />
-    </main>
+    </>
   );
 };
 
