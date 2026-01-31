@@ -9,6 +9,14 @@ interface VHSTransitionProps {
 
 export const VHSTransition = ({ isActive, onComplete }: VHSTransitionProps) => {
   const [phase, setPhase] = useState<'in' | 'hold' | 'out'>('in');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (isActive) {
@@ -51,9 +59,9 @@ export const VHSTransition = ({ isActive, onComplete }: VHSTransitionProps) => {
             transition={{ duration: 0.3 }}
           />
 
-          {/* ASCII Text in center */}
+          {/* ASCII Text in center - responsive sizing */}
           <motion.div
-            className="relative z-10 w-full h-48"
+            className="relative z-10 w-full h-32 md:h-48 px-4"
             initial={{ opacity: 0 }}
             animate={{ 
               opacity: phase === 'hold' ? 1 : 0,
@@ -64,9 +72,9 @@ export const VHSTransition = ({ isActive, onComplete }: VHSTransitionProps) => {
               <ASCIIText
                 text="ARTISTE SPECTRE"
                 enableWaves={false}
-                asciiFontSize={6}
-                textFontSize={120}
-                planeBaseHeight={6}
+                asciiFontSize={isMobile ? 4 : 6}
+                textFontSize={isMobile ? 48 : 120}
+                planeBaseHeight={isMobile ? 4 : 6}
               />
             )}
           </motion.div>
