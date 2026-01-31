@@ -89,35 +89,17 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         aria-label="Toggle menu"
       >
-        <span className="relative flex items-center gap-1">
+        <span className="flex items-center">
+          <span className="text-lg">[</span>
           <motion.span
-            animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-lg"
+            className="text-xs tracking-[0.2em] mx-1 w-10 text-center"
+            initial={false}
+            animate={{ opacity: 1 }}
+            key={mobileMenuOpen ? 'close' : 'menu'}
           >
-            [
+            {mobileMenuOpen ? 'CLOSE' : 'MENU'}
           </motion.span>
-          <motion.span
-            className="text-xs tracking-[0.2em]"
-            animate={{ opacity: mobileMenuOpen ? 0 : 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            {mobileMenuOpen ? '' : 'MENU'}
-          </motion.span>
-          <motion.span
-            className="text-xs tracking-[0.2em] absolute left-4"
-            animate={{ opacity: mobileMenuOpen ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {mobileMenuOpen ? 'CLOSE' : ''}
-          </motion.span>
-          <motion.span
-            animate={{ rotate: mobileMenuOpen ? -90 : 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-lg ml-6"
-          >
-            ]
-          </motion.span>
+          <span className="text-lg">]</span>
         </span>
       </motion.button>
 
@@ -154,18 +136,6 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                 </motion.div>
               ))}
               
-              {/* Scene marker decoration */}
-              <motion.div
-                className="absolute bottom-12 left-1/2 -translate-x-1/2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <span className="scene-heading text-muted-foreground">
-                  — SELECT SCENE —
-                </span>
-              </motion.div>
             </div>
           </motion.div>
         )}
