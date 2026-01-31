@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { VHSTransition } from '@/components/VHSTransition';
 import { CursorTrail } from '@/components/CursorTrail';
+import Noise from '@/components/Noise';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -32,6 +33,7 @@ export const PageLayout = ({ children }: PageLayoutProps) => {
 
   return (
     <div className="bg-background text-foreground min-h-screen overflow-x-hidden">
+      <Noise patternAlpha={20} patternRefreshInterval={3} />
       <CursorTrail />
       <Navigation onNavigate={handleNavigate} />
       <VHSTransition 
