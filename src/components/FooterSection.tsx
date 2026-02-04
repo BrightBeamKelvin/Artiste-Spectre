@@ -3,50 +3,36 @@ import { DrawingLine } from './DrawingLine';
 
 export const FooterSection = () => {
   return (
-    <footer className="py-24">
-      <div className="max-w-5xl mx-auto px-6 md:px-12">
-        <DrawingLine className="w-full mb-16" />
-        
+    <footer className="py-8 border-t border-white/20">
+      <div className="w-full px-6 md:px-12">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8"
+          className="flex flex-col md:flex-row justify-between items-center gap-6"
         >
-          <div>
-            <p className="scene-heading mb-4">ARTISTE SPECTRE LLC</p>
-            <p className="action-text text-muted-foreground/50">
-              Where culture is designed, not chased.
+          <div className="flex items-center gap-6">
+            <p className="text-[11px] uppercase tracking-[0.4em] text-white/90">ARTISTE SPECTRE LLC</p>
+            <p className="hidden md:block text-[10px] uppercase tracking-[0.3em] text-white/60">
+              © 2025 All rights reserved.
             </p>
           </div>
-          
+
           <div className="flex gap-8">
-            <a 
-              href="#" 
-              className="screenplay-link action-text text-muted-foreground hover:text-foreground transition-colors"
+            <a
+              href="/contact"
+              className="text-[11px] uppercase tracking-[0.3em] text-white/80 hover:text-white transition-colors"
             >
               Contact
             </a>
-            <a 
-              href="#" 
-              className="screenplay-link action-text text-muted-foreground hover:text-foreground transition-colors"
+            <a
+              href="#"
+              className="text-[11px] uppercase tracking-[0.3em] text-white/80 hover:text-white transition-colors"
             >
               Instagram
             </a>
           </div>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-16"
-        >
-          <p className="text-xs text-muted-foreground/30">
-            © 2025 Artiste Spectre LLC. All rights reserved.
-          </p>
         </motion.div>
       </div>
     </footer>

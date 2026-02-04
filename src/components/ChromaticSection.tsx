@@ -7,21 +7,21 @@ interface ChromaticSectionProps {
   intensity?: number;
 }
 
-export const ChromaticSection = ({ 
-  children, 
+export const ChromaticSection = ({
+  children,
   className = '',
-  intensity = 1 
+  intensity = 1
 }: ChromaticSectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  
+
   // Track scroll velocity
   const scrollVelocity = useMotionValue(0);
   const lastScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout>();
-  
+
   // Springs that snap back quickly when scrolling stops
   const springConfig = { stiffness: 400, damping: 30 };
-  
+
   const redX = useSpring(0, springConfig);
   const blueX = useSpring(0, springConfig);
   const contentY = useSpring(0, springConfig);
@@ -32,21 +32,35 @@ export const ChromaticSection = ({
       const currentScrollY = window.scrollY;
       const velocity = currentScrollY - lastScrollY.current;
       lastScrollY.current = currentScrollY;
-      
-      // Clamp velocity for subtle effect
-      const clampedVelocity = Math.max(-1, Math.min(1, velocity / 15));
-      
+
+      const absVelocity = Math.abs(velocity);
+      const threshold = 15; // Only trigger for scrolls faster than 15px per event
+
+      if (absVelocity < threshold) {
+        redX.set(0);
+        blueX.set(0);
+        contentY.set(0);
+        aberrationOpacity.set(0);
+        return;
+      }
+
+      // Calculate effective velocity (velocity beyond the threshold)
+      const effectiveVelocity = velocity > 0 ? absVelocity - threshold : -(absVelocity - threshold);
+
+      // Clamp velocity for subtle effect, using a slightly higher divisor for the new scale
+      const clampedVelocity = Math.max(-1, Math.min(1, effectiveVelocity / 30));
+
       // Apply subtle offsets based on scroll direction
-      redX.set(clampedVelocity * 2 * intensity);
-      blueX.set(clampedVelocity * -2 * intensity);
-      contentY.set(clampedVelocity * 3 * intensity);
-      aberrationOpacity.set(Math.abs(clampedVelocity) * 0.5);
-      
+      redX.set(clampedVelocity * 3 * intensity);
+      blueX.set(clampedVelocity * -3 * intensity);
+      contentY.set(clampedVelocity * 4 * intensity);
+      aberrationOpacity.set(Math.abs(clampedVelocity) * 0.7);
+
       // Clear existing timeout
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
       }
-      
+
       // Snap back to normal when scrolling stops
       scrollTimeout.current = setTimeout(() => {
         redX.set(0);
@@ -68,9 +82,9 @@ export const ChromaticSection = ({
   return (
     <div ref={ref} className={`relative ${className}`}>
       {/* Red ghost */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 pointer-events-none select-none"
-        style={{ 
+        style={{
           x: redX,
           opacity: aberrationOpacity,
           color: 'rgb(255, 100, 100)',
@@ -80,11 +94,11 @@ export const ChromaticSection = ({
       >
         {children}
       </motion.div>
-      
+
       {/* Blue ghost */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 pointer-events-none select-none"
-        style={{ 
+        style={{
           x: blueX,
           opacity: aberrationOpacity,
           color: 'rgb(100, 140, 255)',
@@ -94,9 +108,9 @@ export const ChromaticSection = ({
       >
         {children}
       </motion.div>
-      
+
       {/* Main content with subtle parallax */}
-      <motion.div 
+      <motion.div
         className="relative"
         style={{ y: contentY }}
       >

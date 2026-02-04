@@ -2,51 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ARTISTE SPECTRE — Screenplay Design System */
+/* ARTISTE SPECTRE — Design System */
 
 @layer base {
   :root {
     /* Core palette - stark, editorial */
     --background: 0 0% 2%;
     --foreground: 0 0% 92%;
-    
+
     --card: 0 0% 4%;
     --card-foreground: 0 0% 92%;
-    
+
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 92%;
-    
+
     /* Primary - pure white on black */
     --primary: 0 0% 92%;
     --primary-foreground: 0 0% 2%;
-    
+
     /* Muted - subtle greys */
     --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 70%;
-    
+
     --muted: 0 0% 12%;
     --muted-foreground: 0 0% 50%;
-    
+
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 92%;
-    
+
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    
+
     --border: 0 0% 15%;
     --input: 0 0% 15%;
     --ring: 0 0% 50%;
-    
+
     --radius: 0px;
-    
+
     /* Typography */
     --font-mono: 'IBM Plex Mono', monospace;
     --font-mono-alt: 'Roboto Mono', monospace;
-    
+
     /* Screenplay spacing */
     --scene-margin: 4rem;
     --line-height-script: 1.6;
-    
+
     /* Animation timing */
     --transition-slow: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-medium: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -58,11 +58,11 @@
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-mono);
@@ -71,100 +71,111 @@
     letter-spacing: 0.02em;
     cursor: crosshair;
   }
-  
+
   ::selection {
     background: hsl(var(--foreground));
     color: hsl(var(--background));
   }
 }
 
-/* Screenplay typography classes */
+/* Typography system */
 @layer components {
-  .scene-heading {
-    @apply text-xs uppercase tracking-[0.3em] text-muted-foreground;
-    font-family: var(--font-mono-alt);
-  }
-  
-  .screenplay-line {
-    @apply text-lg md:text-xl leading-relaxed;
-    font-family: var(--font-mono);
-    font-weight: 300;
-  }
-  
-  .action-text {
-    @apply text-sm text-muted-foreground;
-    font-family: var(--font-mono-alt);
-    font-weight: 400;
-  }
-  
   /* Minimal link underline animation */
-  .screenplay-link {
-    @apply relative inline-block;
-  }
-  
-  .screenplay-link::after {
-    content: '';
-    @apply absolute bottom-0 left-0 w-0 h-px bg-foreground;
-    transition: width var(--transition-medium);
-  }
-  
-  .screenplay-link:hover::after {
-    @apply w-full;
-  }
-  
+
   /* Drawing line animation */
   .draw-line {
     @apply h-px bg-border;
     transform-origin: left;
     animation: draw 1.2s var(--transition-slow) forwards;
   }
-  
+
   @keyframes draw {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
+    from {
+      transform: scaleX(0);
+    }
+
+    to {
+      transform: scaleX(1);
+    }
   }
-  
+
   /* Typewriter cursor */
   .cursor-blink::after {
     content: '▌';
     @apply text-muted-foreground;
     animation: blink 1s step-end infinite;
   }
-  
+
   @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+
+    0%,
+    50% {
+      opacity: 1;
+    }
+
+    51%,
+    100% {
+      opacity: 0;
+    }
   }
-  
+
   /* Fade reveal animation */
   .fade-reveal {
     @apply opacity-0;
     animation: fadeReveal 0.8s ease-out forwards;
   }
-  
+
   @keyframes fadeReveal {
-    from { 
-      opacity: 0; 
+    from {
+      opacity: 0;
       transform: translateY(8px);
     }
-    to { 
-      opacity: 1; 
+
+    to {
+      opacity: 1;
       transform: translateY(0);
     }
   }
-  
+
   /* Stagger children utility */
-  .stagger-children > * {
+  .stagger-children>* {
     @apply opacity-0;
     animation: fadeReveal 0.6s ease-out forwards;
   }
-  
-  .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
-  .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
-  .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
-  .stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
-  .stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
-  .stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
-  .stagger-children > *:nth-child(7) { animation-delay: 0.7s; }
-  .stagger-children > *:nth-child(8) { animation-delay: 0.8s; }
+
+  .stagger-children>*:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-children>*:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-children>*:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .stagger-children>*:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+
+  .stagger-children>*:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+
+  .stagger-children>*:nth-child(6) {
+    animation-delay: 0.6s;
+  }
+
+  .stagger-children>*:nth-child(7) {
+    animation-delay: 0.7s;
+  }
+
+  .stagger-children>*:nth-child(8) {
+    animation-delay: 0.8s;
+  }
+
+  .selection-highlight {
+    @apply bg-foreground text-background px-1.5 -mx-1;
+  }
 }

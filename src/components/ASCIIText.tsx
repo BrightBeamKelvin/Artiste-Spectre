@@ -99,8 +99,6 @@ class AsciiFilter {
       this.context.imageSmoothingEnabled = false;
     }
 
-    this.onMouseMove = this.onMouseMove.bind(this);
-    document.addEventListener('mousemove', this.onMouseMove);
   }
 
   setSize(width: number, height: number) {
@@ -178,7 +176,6 @@ class AsciiFilter {
   }
 
   dispose() {
-    document.removeEventListener('mousemove', this.onMouseMove);
   }
 }
 
@@ -300,16 +297,10 @@ class CanvAscii {
 
     this.scene = new THREE.Scene();
     this.mouse = { x: this.width / 2, y: this.height / 2 };
-
-    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   async init() {
-    try {
-      await document.fonts.load('600 200px "IBM Plex Mono"');
-      await document.fonts.load('500 12px "IBM Plex Mono"');
-    } catch (e) {}
-    await document.fonts.ready;
+    // Fonts are preloaded in index.html, non-blocking init here
     this.setMesh();
     this.setRenderer();
   }
@@ -361,16 +352,29 @@ class CanvAscii {
 
     this.container.appendChild(this.filter.domElement);
     this.setSize(this.width, this.height);
-
-    this.container.addEventListener('mousemove', this.onMouseMove);
-    this.container.addEventListener('touchmove', this.onMouseMove);
   }
 
   setSize(w: number, h: number) {
     this.width = w;
     this.height = h;
 
-    this.camera.aspect = w / h;
+    const aspect = w / h;
+    this.camera.aspect = aspect;
+
+    // Auto-adjust camera distance to fit plane width
+    const textAspect = this.textCanvas.width / this.textCanvas.height;
+    const planeW = this.planeBaseHeight * textAspect;
+
+    // Calculate required distance to fit planeW in horizontal FOV
+    // Horizontal FOV = 2 * atan(tan(verticalFOV/2) * aspect)
+    const fovRad = (this.camera.fov * Math.PI) / 180;
+    const hFovRad = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
+    const distForW = (planeW / 2) / Math.tan(hFovRad / 2);
+    const distForH = (this.planeBaseHeight / 2) / Math.tan(fovRad / 2);
+
+    // Set camera Z to fit both width and height with some padding
+    this.camera.position.z = Math.max(distForW, distForH) * 1.1;
+
     this.camera.updateProjectionMatrix();
 
     this.filter.setSize(w, h);
@@ -383,11 +387,6 @@ class CanvAscii {
   }
 
   onMouseMove(evt: MouseEvent | TouchEvent) {
-    const e = (evt as TouchEvent).touches ? (evt as TouchEvent).touches[0] : (evt as MouseEvent);
-    const bounds = this.container.getBoundingClientRect();
-    const x = e.clientX - bounds.left;
-    const y = e.clientY - bounds.top;
-    this.mouse = { x, y };
   }
 
   animate() {
@@ -411,8 +410,8 @@ class CanvAscii {
   }
 
   updateRotation() {
-    const x = map(this.mouse.y, 0, this.height, 0.5, -0.5);
-    const y = map(this.mouse.x, 0, this.width, -0.5, 0.5);
+    const x = 0;
+    const y = 0;
 
     this.mesh.rotation.x += (x - this.mesh.rotation.x) * 0.05;
     this.mesh.rotation.y += (y - this.mesh.rotation.y) * 0.05;
@@ -546,12 +545,12 @@ export default function ASCIIText({
   }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves]);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="ascii-text-container"
-      style={{ 
-        width: '100%', 
-        height: '100%', 
+      style={{
+        width: '100%',
+        height: '100%',
         position: 'relative',
         overflow: 'hidden'
       }}

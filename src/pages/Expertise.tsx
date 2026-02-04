@@ -57,15 +57,6 @@ const Expertise = () => {
   return (
     <main className="bg-background text-foreground min-h-screen pt-24 pb-16">
       <div className="max-w-5xl mx-auto px-6 md:px-12">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-8"
-        >
-          <span className="scene-heading">INT. THE METHODOLOGY — NIGHT</span>
-        </motion.div>
-
         <DrawingLine className="w-full mb-12" delay={0.3} />
 
         <motion.h1
@@ -81,7 +72,7 @@ const Expertise = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="action-text max-w-xl mb-16"
+          className="text-sm text-muted-foreground max-w-xl mb-16"
         >
           Full-stack creative and production services. From strategy through execution—no fragmentation, no handoffs, no compromises.
         </motion.p>
@@ -100,7 +91,7 @@ const Expertise = () => {
                   onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
                   className="w-full py-6 flex items-center justify-between group"
                 >
-                  <span className="scene-heading text-left group-hover:text-foreground transition-colors">
+                  <span className="text-sm uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
                     {service.category}
                   </span>
                   <motion.span
@@ -111,7 +102,7 @@ const Expertise = () => {
                     +
                   </motion.span>
                 </button>
-                
+
                 <motion.div
                   initial={{ height: 0 }}
                   animate={{ height: expandedIndex === index ? 'auto' : 0 }}
@@ -123,12 +114,12 @@ const Expertise = () => {
                       <motion.p
                         key={itemIndex}
                         initial={{ opacity: 0, x: -10 }}
-                        animate={{ 
+                        animate={{
                           opacity: expandedIndex === index ? 1 : 0,
                           x: expandedIndex === index ? 0 : -10,
                         }}
                         transition={{ delay: itemIndex * 0.05, duration: 0.3 }}
-                        className="action-text py-2"
+                        className="text-sm py-2 text-muted-foreground"
                       >
                         {item}
                       </motion.p>
@@ -141,11 +132,6 @@ const Expertise = () => {
         </div>
 
         <DrawingLine className="w-full mb-16" delay={0.5} />
-
-        {/* Verticals */}
-        <RevealText delay={0.6}>
-          <span className="scene-heading mb-8 block">VERTICALS</span>
-        </RevealText>
 
         <div className="flex flex-wrap gap-4 mb-16">
           {verticals.map((vertical, index) => (
@@ -161,13 +147,6 @@ const Expertise = () => {
         </div>
 
         <DrawingLine className="w-48" delay={0.7} />
-
-        {/* Team note */}
-        <RevealText delay={0.8}>
-          <p className="action-text text-center mt-16 text-muted-foreground/50">
-            In-house creative leads. Extended network of directors, photographers, producers, and designers.
-          </p>
-        </RevealText>
       </div>
     </main>
   );

@@ -34,15 +34,6 @@ const Work = () => {
   return (
     <main className="bg-background text-foreground min-h-screen pt-24 pb-16">
       <div className="max-w-5xl mx-auto px-6 md:px-12">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-8"
-        >
-          <span className="scene-heading">INT. THE ARCHIVE — CONTINUOUS</span>
-        </motion.div>
-
         <DrawingLine className="w-full mb-12" delay={0.3} />
 
         <motion.h1
@@ -58,7 +49,7 @@ const Work = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="action-text max-w-xl mb-16"
+          className="text-sm text-muted-foreground max-w-xl mb-16"
         >
           A curated collection of campaigns, productions, and cultural interventions. Each project represents our commitment to designing influence, not chasing it.
         </motion.p>
@@ -74,17 +65,17 @@ const Work = () => {
                 transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="flex items-baseline justify-between gap-4 mb-3">
-                  <span className="scene-heading text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
                     {project.category}
                   </span>
-                  <span className="text-muted-foreground/30 text-xs">
+                  <span className="text-muted-foreground/30 text-[10px]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 </div>
                 <h3 className="text-xl md:text-2xl font-light tracking-tight group-hover:text-foreground transition-colors">
                   {project.title}
                 </h3>
-                <p className="action-text mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p className="text-sm text-muted-foreground mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   {project.description}
                 </p>
               </motion.div>
@@ -99,7 +90,7 @@ const Work = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="action-text text-center mt-12 text-muted-foreground/50"
+          className="text-xs text-center mt-12 text-muted-foreground/30"
         >
           Additional case studies available upon request.
         </motion.p>

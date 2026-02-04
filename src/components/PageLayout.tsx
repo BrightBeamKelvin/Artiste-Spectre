@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { VHSTransition } from '@/components/VHSTransition';
@@ -12,15 +12,19 @@ interface PageLayoutProps {
 export const PageLayout = ({ children }: PageLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(true);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
 
   const handleNavigate = useCallback((path: string) => {
     if (path === location.pathname) return;
-    
-    setPendingPath(path);
-    setIsTransitioning(true);
-  }, [location.pathname]);
+
+    if (path === '/') {
+      setPendingPath(path);
+      setIsTransitioning(true);
+    } else {
+      navigate(path);
+    }
+  }, [location.pathname, navigate]);
 
   const handleTransitionComplete = useCallback(() => {
     if (pendingPath) {
@@ -31,14 +35,18 @@ export const PageLayout = ({ children }: PageLayoutProps) => {
     setTimeout(() => setIsTransitioning(false), 400);
   }, [navigate, pendingPath]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div className="bg-background text-foreground min-h-screen overflow-x-hidden">
       <Noise patternAlpha={20} patternRefreshInterval={3} />
       <CursorTrail />
       <Navigation onNavigate={handleNavigate} />
-      <VHSTransition 
-        isActive={isTransitioning} 
-        onComplete={handleTransitionComplete} 
+      <VHSTransition
+        isActive={isTransitioning}
+        onComplete={handleTransitionComplete}
       />
       {children}
     </div>

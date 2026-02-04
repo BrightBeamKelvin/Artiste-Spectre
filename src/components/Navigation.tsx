@@ -36,7 +36,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
         <Link
           to="/"
           onClick={(e) => handleClick(e, '/')}
-          className="scene-heading text-foreground tracking-[0.2em] hover:text-muted-foreground transition-colors duration-300"
+          className="text-[10px] uppercase tracking-[0.3em] font-light text-foreground hover:text-muted-foreground transition-colors duration-300"
         >
           ARTISTE SPECTRE
         </Link>
@@ -57,20 +57,19 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                 onClick={(e) => handleClick(e, item.path)}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                className={`scene-heading relative transition-colors duration-300 ${
-                  location.pathname === item.path
+                className={`text-[10px] uppercase tracking-[0.3em] relative transition-colors duration-300 ${location.pathname === item.path
                     ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
-                }`}
+                  }`}
               >
                 {item.label}
                 <motion.span
                   className="absolute -bottom-1 left-0 h-px bg-foreground"
                   initial={{ width: 0 }}
-                  animate={{ 
-                    width: hoveredIndex === index || location.pathname === item.path 
-                      ? '100%' 
-                      : 0 
+                  animate={{
+                    width: hoveredIndex === index || location.pathname === item.path
+                      ? '100%'
+                      : 0
                   }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 />
@@ -80,9 +79,9 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
         </ul>
       </nav>
 
-      {/* Mobile Menu Toggle - Screenplay brackets style */}
+      {/* Mobile Menu Toggle */}
       <motion.button
-        className="fixed top-6 right-6 z-50 md:hidden scene-heading text-foreground"
+        className="fixed top-6 right-6 z-50 md:hidden text-foreground"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
@@ -90,16 +89,14 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
         aria-label="Toggle menu"
       >
         <span className="flex items-center">
-          <span className="text-lg">[</span>
           <motion.span
-            className="text-xs tracking-[0.2em] mx-1 w-10 text-center"
+            className="text-[10px] tracking-[0.2em] font-light w-10 text-center"
             initial={false}
             animate={{ opacity: 1 }}
             key={mobileMenuOpen ? 'close' : 'menu'}
           >
             {mobileMenuOpen ? 'CLOSE' : 'MENU'}
           </motion.span>
-          <span className="text-lg">]</span>
         </span>
       </motion.button>
 
@@ -125,17 +122,16 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                   <Link
                     to={item.path}
                     onClick={(e) => handleClick(e, item.path)}
-                    className={`text-2xl tracking-[0.4em] font-light transition-colors duration-300 ${
-                      location.pathname === item.path
+                    className={`text-2xl tracking-[0.4em] font-light transition-colors duration-300 ${location.pathname === item.path
                         ? 'text-foreground'
                         : 'text-muted-foreground'
-                    }`}
+                      }`}
                   >
                     {item.label}
                   </Link>
                 </motion.div>
               ))}
-              
+
             </div>
           </motion.div>
         )}

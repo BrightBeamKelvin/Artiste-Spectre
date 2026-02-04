@@ -16,33 +16,23 @@ const manifestoLines = [
 
 export const ManifestoSection = () => {
   return (
-    <section className="min-h-screen flex items-center py-24">
+    <section className="min-h-screen flex flex-col justify-center py-16 md:py-24">
       <div className="w-full max-w-3xl mx-auto px-6 md:px-12">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="mb-12"
-        >
-          <span className="scene-heading">MANIFESTO</span>
-        </motion.div>
-        
-        <DrawingLine className="w-full mb-16" delay={0.2} />
-        
-        <div className="space-y-2">
+        <DrawingLine className="w-full mb-10" delay={0.2} />
+
+        <div className="space-y-4">
           {manifestoLines.map((line, index) => (
-            <RevealText 
-              key={index} 
+            <RevealText
+              key={index}
               delay={index * 0.08}
-              className={`screenplay-line ${line === '' ? 'h-6' : ''}`}
+              className={`text-xl md:text-2xl font-light leading-relaxed ${line === '' ? 'h-6' : ''}`}
             >
               {line}
             </RevealText>
           ))}
         </div>
-        
-        <DrawingLine className="w-48 mt-16" delay={0.6} />
+
+        <DrawingLine className="w-48 mt-10" delay={0.6} />
       </div>
     </section>
   );
