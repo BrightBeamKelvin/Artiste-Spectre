@@ -17,22 +17,24 @@ const manifestoLines = [
 export const ManifestoSection = () => {
   return (
     <section className="min-h-screen flex flex-col justify-center py-16 md:py-24">
-      <div className="w-full max-w-3xl mx-auto px-6 md:px-12">
-        <DrawingLine className="w-full mb-10" delay={0.2} />
+      <div className="w-full max-w-7xl ml-auto px-6 md:px-12">
+        <div className="max-w-2xl ml-auto">
+          <DrawingLine className="w-48 mb-10" delay={0.2} />
 
-        <div className="space-y-4">
-          {manifestoLines.map((line, index) => (
-            <RevealText
-              key={index}
-              delay={index * 0.08}
-              className={`text-xl md:text-2xl font-light leading-relaxed ${line === '' ? 'h-6' : ''}`}
-            >
-              {line}
-            </RevealText>
-          ))}
+          <div className="space-y-3">
+            {manifestoLines.map((line, index) => (
+              <RevealText
+                key={index}
+                delay={index * 0.08}
+                className={`text-lg md:text-xl font-light leading-relaxed ${line === '' ? 'h-4' : ''}`}
+              >
+                {line}
+              </RevealText>
+            ))}
+          </div>
+
+          <DrawingLine className="w-32 mt-10" delay={0.6} />
         </div>
-
-        <DrawingLine className="w-48 mt-10" delay={0.6} />
       </div>
     </section>
   );

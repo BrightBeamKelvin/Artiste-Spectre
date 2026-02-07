@@ -176,6 +176,6 @@
   }
 
   .selection-highlight {
-    @apply bg-foreground text-background px-1.5 -mx-1;
+    @apply bg-foreground text-background px-0.5 -mx-0 md:px-1.5 md:-mx-1;
   }
 }

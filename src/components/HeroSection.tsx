@@ -13,27 +13,38 @@ export const HeroSection = () => {
   }, []);
 
   return (
-    <section className="min-h-screen flex flex-col justify-center relative px-6 md:px-12 py-24">
-      <div className="max-w-5xl mx-auto w-full">
-        <DrawingLine className="w-full mb-8" delay={0.5} />
+    <section className="min-h-screen flex flex-col justify-center relative px-6 md:px-12 pb-32 pt-32">
+      <div className="max-w-7xl w-full">
+        <DrawingLine className="w-32 md:w-64 mb-12" delay={0.5} />
 
-        {/* Main title */}
-        <div className="mb-8 min-h-[4.5rem] md:min-h-[7.5rem] lg:min-h-[8.5rem]">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-light leading-tight tracking-tight">
+        {/* Main title - left aligned, editorial style */}
+        <div className="mb-16 max-w-4xl">
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-light leading-[0.95] tracking-tight">
             <TypewriterText
-              text="Where culture is designed,"
+              text="Where culture is"
               delay={800}
               speed={35}
               onComplete={() => setShowSubtext(true)}
-              highlightWords={["designed"]}
             />
           </h1>
-          <div className="min-h-[1.5rem] md:min-h-[2.5rem] lg:min-h-[3rem] mt-2">
+          <div className="mt-5">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-light leading-[0.95] tracking-tight">
+              {showSubtext && (
+                <TypewriterText
+                  text="designed,"
+                  delay={200}
+                  speed={35}
+                  highlightWords={["designed"]}
+                />
+              )}
+            </h1>
+          </div>
+          <div className="min-h-[1.5rem] md:min-h-[2.5rem] lg:min-h-[3rem] mt-2 md:mt-6">
             {showSubtext && (
               <h1 className="text-2xl md:text-4xl lg:text-5xl font-light leading-tight tracking-tight">
                 <TypewriterText
                   text="not chased."
-                  delay={200}
+                  delay={600}
                   speed={45}
                 />
               </h1>
@@ -41,12 +52,12 @@ export const HeroSection = () => {
           </div>
         </div>
 
-        {/* Subtext */}
+        {/* Subtext - positioned offset */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: showSubtext ? 1 : 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="max-w-xl"
+          className="max-w-md ml-0 md:ml-12"
         >
           <p className="leading-relaxed text-muted-foreground">
             Creator-led creative & production agency.
@@ -56,7 +67,7 @@ export const HeroSection = () => {
           </p>
         </motion.div>
 
-        <DrawingLine className="w-32 mt-8" delay={2.5} />
+        <DrawingLine className="w-24 mt-12 ml-0 md:ml-12" delay={2.5} />
       </div>
 
       {/* Scroll indicator - text and arrow */}
@@ -64,7 +75,7 @@ export const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: showScroll ? 1 : 0 }}
         transition={{ duration: 0.8 }}
-        className="absolute bottom-12 left-6 md:left-12 z-20"
+        className="absolute bottom-12 right-6 md:right-12 z-20"
       >
         <motion.div
           animate={{ y: [0, 5, 0] }}
