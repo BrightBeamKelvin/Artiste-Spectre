@@ -178,4 +178,9 @@
   .selection-highlight {
     @apply bg-foreground text-background px-0.5 -mx-0 md:px-1.5 md:-mx-1;
   }
+
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
