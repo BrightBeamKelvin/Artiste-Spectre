@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DrawingLine } from '@/components/DrawingLine';
-import { WorkProjectRow } from '@/components/WorkProjectRow';
 import { useWorkData } from '@/hooks/useWorkData';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type Filter = 'all' | 'brand' | 'albums';
 
 const Work = () => {
   const { data, isLoading, error } = useWorkData();
   const [filter, setFilter] = useState<Filter>('all');
-  const [openProject, setOpenProject] = useState<string | null>(null);
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+  const [activePreview, setActivePreview] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const listRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -23,6 +27,34 @@ const Work = () => {
     if (filter === 'albums') return data.albumCovers;
     return [...data.brandWork, ...data.albumCovers];
   })();
+
+  // Mobile: track which project is "in view" based on scroll position
+  useEffect(() => {
+    if (!isMobile || projects.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActivePreview(entry.target.getAttribute('data-project'));
+          }
+        });
+      },
+      { rootMargin: '-50% 0px -20% 0px', threshold: 0 }
+    );
+
+    itemRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [isMobile, projects]);
+
+  // Get the first media item for a given project name
+  const getPreviewItem = (projectName: string | null) => {
+    if (!projectName) return null;
+    const project = projects.find((p) => p.name === projectName);
+    return project?.media[0] ?? null;
+  };
+
+  const currentPreview = getPreviewItem(isMobile ? activePreview : hoveredProject);
 
   return (
     <main className="bg-background text-foreground min-h-screen pt-24 pb-16">
@@ -49,7 +81,7 @@ const Work = () => {
           {filters.map((f) => (
             <button
               key={f.key}
-              onClick={() => { setFilter(f.key); setOpenProject(null); }}
+              onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); }}
               className={`text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${
                 filter === f.key
                   ? 'text-foreground border-foreground'
@@ -84,67 +116,164 @@ const Work = () => {
         </div>
       )}
 
-      {/* Project index list */}
-      <div className="px-6 md:px-12">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={filter}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {projects.map((project, index) => {
-              const isOpen = openProject === project.name;
-              return (
-                <div key={project.name} className="border-b border-border/15">
-                  {/* Project name row */}
-                  <motion.button
-                    className="w-full flex items-baseline justify-between py-4 md:py-5 group text-left"
+      {/* DESKTOP LAYOUT: names left, preview right */}
+      {!isMobile && (
+        <div className="px-6 md:px-12 flex gap-12">
+          {/* Left: project list */}
+          <div className="w-1/2" ref={listRef}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={filter}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {projects.map((project, index) => (
+                  <motion.div
+                    key={project.name}
+                    className="border-b border-border/15"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
-                    onClick={() => setOpenProject(isOpen ? null : project.name)}
                   >
-                    <span
-                      className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-300 ${
-                        isOpen ? 'text-foreground' : 'text-muted-foreground/70 group-hover:text-foreground'
-                      }`}
+                    <button
+                      className="w-full py-4 md:py-5 text-left group"
+                      onMouseEnter={() => setHoveredProject(project.name)}
+                      onMouseLeave={() => setHoveredProject(null)}
+                      onClick={() => setHoveredProject(
+                        hoveredProject === project.name ? null : project.name
+                      )}
                     >
-                      {project.name}
-                    </span>
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/30">
-                        {project.category}
+                      <span
+                        className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-300 ${
+                          hoveredProject === project.name
+                            ? 'text-foreground'
+                            : 'text-muted-foreground/70 group-hover:text-foreground'
+                        }`}
+                      >
+                        {project.name}
                       </span>
-                      <span className="text-[10px] font-mono text-muted-foreground/25">
-                        {project.media.length}
+                    </button>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Right: sticky preview */}
+          <div className="w-1/2 relative">
+            <div className="sticky top-24">
+              <AnimatePresence mode="wait">
+                {currentPreview && (
+                  <motion.div
+                    key={currentPreview.pathname}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="aspect-[4/5] overflow-hidden"
+                  >
+                    {currentPreview.type === 'video' ? (
+                      <video
+                        src={currentPreview.url}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={currentPreview.url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE LAYOUT: list + sticky bottom preview */}
+      {isMobile && (
+        <div className="relative">
+          {/* Project list */}
+          <div className="px-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={filter}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {projects.map((project, index) => (
+                  <motion.div
+                    key={project.name}
+                    ref={(el) => {
+                      if (el) itemRefs.current.set(project.name, el);
+                    }}
+                    data-project={project.name}
+                    className="border-b border-border/15"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                  >
+                    <div className="py-4 text-left">
+                      <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-300 ${
+                        activePreview === project.name
+                          ? 'text-foreground'
+                          : 'text-muted-foreground/70'
+                      }`}>
+                        {project.name}
                       </span>
                     </div>
-                  </motion.button>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-                  {/* Expandable media */}
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pb-6">
-                          <WorkProjectRow project={project} index={0} />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+          {/* Sticky bottom preview */}
+          <div className="fixed bottom-0 left-0 right-0 h-[25vh] pointer-events-none z-10">
+            <AnimatePresence mode="wait">
+              {currentPreview && (
+                <motion.div
+                  key={currentPreview.pathname}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="w-full h-full overflow-hidden"
+                >
+                  {/* Gradient fade at top */}
+                  <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-background to-transparent z-10" />
+                  {currentPreview.type === 'video' ? (
+                    <video
+                      src={currentPreview.url}
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={currentPreview.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       {/* Empty state */}
       {!isLoading && !error && projects.length === 0 && (
