@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DrawingLine } from '@/components/DrawingLine';
 import { useWorkData } from '@/hooks/useWorkData';
@@ -12,8 +12,8 @@ const Work = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const [activePreview, setActivePreview] = useState<string | null>(null);
   const isMobile = useIsMobile();
-  const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -28,24 +28,56 @@ const Work = () => {
     return [...data.brandWork, ...data.albumCovers];
   })();
 
-  // Mobile: track which project is "in view" based on scroll position
+  // Set first project as default active on mobile
+  useEffect(() => {
+    if (isMobile && projects.length > 0 && !activePreview) {
+      setActivePreview(projects[0].name);
+    }
+  }, [isMobile, projects, activePreview]);
+
+  // Mobile: IntersectionObserver to track which project name is in center of screen
   useEffect(() => {
     if (!isMobile || projects.length === 0) return;
 
-    const observer = new IntersectionObserver(
+    // Cleanup previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        // Find the most intersecting entry
+        let bestEntry: IntersectionObserverEntry | null = null;
+        for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActivePreview(entry.target.getAttribute('data-project'));
+            if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
+              bestEntry = entry;
+            }
           }
-        });
+        }
+        if (bestEntry) {
+          const name = bestEntry.target.getAttribute('data-project');
+          if (name) setActivePreview(name);
+        }
       },
-      { rootMargin: '-50% 0px -20% 0px', threshold: 0 }
+      { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.5, 1] }
     );
 
-    itemRefs.current.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [isMobile, projects]);
+    // Observe all current items
+    itemRefs.current.forEach((el) => {
+      observerRef.current?.observe(el);
+    });
+
+    return () => observerRef.current?.disconnect();
+  }, [isMobile, projects, filter]);
+
+  const setItemRef = useCallback((name: string) => (el: HTMLDivElement | null) => {
+    if (el) {
+      itemRefs.current.set(name, el);
+    } else {
+      itemRefs.current.delete(name);
+    }
+  }, []);
 
   // Get the first media item for a given project name
   const getPreviewItem = (projectName: string | null) => {
@@ -120,7 +152,7 @@ const Work = () => {
       {!isMobile && (
         <div className="px-6 md:px-12 flex gap-12">
           {/* Left: project list */}
-          <div className="w-1/2" ref={listRef}>
+          <div className="w-1/2">
             <AnimatePresence mode="wait">
               <motion.div
                 key={filter}
@@ -141,9 +173,6 @@ const Work = () => {
                       className="w-full py-4 md:py-5 text-left group"
                       onMouseEnter={() => setHoveredProject(project.name)}
                       onMouseLeave={() => setHoveredProject(null)}
-                      onClick={() => setHoveredProject(
-                        hoveredProject === project.name ? null : project.name
-                      )}
                     >
                       <span
                         className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-300 ${
@@ -198,9 +227,9 @@ const Work = () => {
         </div>
       )}
 
-      {/* MOBILE LAYOUT: list + sticky bottom preview */}
+      {/* MOBILE LAYOUT: list with scaled preview at bottom */}
       {isMobile && (
-        <div className="relative">
+        <div className="relative pb-[45vh]">
           {/* Project list */}
           <div className="px-6">
             <AnimatePresence mode="wait">
@@ -214,9 +243,7 @@ const Work = () => {
                 {projects.map((project, index) => (
                   <motion.div
                     key={project.name}
-                    ref={(el) => {
-                      if (el) itemRefs.current.set(project.name, el);
-                    }}
+                    ref={setItemRef(project.name)}
                     data-project={project.name}
                     className="border-b border-border/15"
                     initial={{ opacity: 0, y: 8 }}
@@ -238,20 +265,21 @@ const Work = () => {
             </AnimatePresence>
           </div>
 
-          {/* Sticky bottom preview */}
-          <div className="fixed bottom-0 left-0 right-0 h-[25vh] pointer-events-none z-10">
+          {/* Fixed bottom preview — scaled/contained image, not full bleed */}
+          <div className="fixed bottom-0 left-0 right-0 h-[40vh] flex items-center justify-center pointer-events-none z-10">
+            {/* Top gradient fade */}
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background to-transparent z-20" />
+            
             <AnimatePresence mode="wait">
               {currentPreview && (
                 <motion.div
                   key={currentPreview.pathname}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="w-full h-full overflow-hidden"
+                  className="w-[60%] max-h-[36vh] overflow-hidden"
                 >
-                  {/* Gradient fade at top */}
-                  <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-background to-transparent z-10" />
                   {currentPreview.type === 'video' ? (
                     <video
                       src={currentPreview.url}
@@ -259,13 +287,13 @@ const Work = () => {
                       loop
                       autoPlay
                       playsInline
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <img
                       src={currentPreview.url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   )}
                 </motion.div>
@@ -284,7 +312,7 @@ const Work = () => {
         </div>
       )}
 
-      {projects.length > 0 && (
+      {projects.length > 0 && !isMobile && (
         <div className="mt-16 px-6 md:px-12">
           <DrawingLine className="w-64" delay={0.5} />
         </div>
