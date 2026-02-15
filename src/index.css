@@ -7,7 +7,7 @@
 @layer base {
   :root {
     /* Core palette - stark, editorial */
-    --background: 0 0% 2%;
+    --background: 0 0% 11%;
     --foreground: 0 0% 92%;
 
     --card: 0 0% 4%;
@@ -61,10 +61,12 @@
 
   html {
     scroll-behavior: smooth;
+    background-color: hsl(var(--background));
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
+    background-color: transparent;
     font-family: var(--font-mono);
     font-weight: 300;
     line-height: var(--line-height-script);
@@ -75,6 +77,30 @@
   ::selection {
     background: hsl(var(--foreground));
     color: hsl(var(--background));
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.15);
+    border-radius: 0px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.15) hsl(var(--background));
   }
 }
 

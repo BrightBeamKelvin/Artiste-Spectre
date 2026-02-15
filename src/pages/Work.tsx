@@ -91,45 +91,9 @@ const Work = () => {
 
   return (
     <main className="bg-background text-foreground min-h-screen pt-24 pb-16">
-      {/* Header */}
-      <div className="px-6 md:px-12 mb-12 md:mb-20">
-        <DrawingLine className="w-32 mb-6" delay={0.3} />
-
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="text-3xl md:text-5xl font-light tracking-tight mb-8"
-        >
-          Work
-        </motion.h1>
-
-        {/* Filter tabs */}
-        <motion.div
-          className="flex gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          {filters.map((f) => (
-            <button
-              key={f.key}
-              onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); }}
-              className={`text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${
-                filter === f.key
-                  ? 'text-foreground border-foreground'
-                  : 'text-muted-foreground/50 border-transparent hover:text-muted-foreground'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </motion.div>
-      </div>
-
       {/* Loading */}
       {isLoading && (
-        <div className="px-6 md:px-12">
+        <div className="px-6 md:px-12 mb-8">
           <motion.p
             className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40"
             animate={{ opacity: [0.3, 0.7, 0.3] }}
@@ -142,7 +106,7 @@ const Work = () => {
 
       {/* Error */}
       {error && (
-        <div className="px-6 md:px-12">
+        <div className="px-6 md:px-12 mb-8">
           <p className="text-[10px] uppercase tracking-[0.3em] text-destructive/60">
             Failed to load work.
           </p>
@@ -152,77 +116,85 @@ const Work = () => {
       {/* DESKTOP LAYOUT: names left, preview right */}
       {!isMobile && (
         <div className="px-6 md:px-12 flex gap-12">
-          {/* Left: project list */}
-          <div className="w-1/2">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={filter}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
+          {/* Left: Header + project list */}
+          <div className="w-1/2 pt-0">
+            <div className="mb-12 md:mb-20">
+              <DrawingLine className="w-32 mb-6" delay={0} />
+              <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-8">
+                Work
+              </h1>
+
+              {/* Filter tabs */}
+              <div className="flex gap-6">
+                {filters.map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); }}
+                    className={`text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${filter === f.key
+                      ? 'text-foreground border-foreground'
+                      : 'text-muted-foreground/50 border-transparent hover:text-muted-foreground'
+                      }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div key={filter}>
                 {projects.map((project, index) => (
-                  <motion.div
+                  <div
                     key={project.name}
                     className="border-b border-border/15"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
                   >
                     <button
-                      className="w-full py-4 md:py-5 text-left group"
+                      className="w-full py-1 md:py-1.5 text-left group"
                       onMouseEnter={() => setHoveredProject(project.name)}
                       onMouseLeave={() => setHoveredProject(null)}
                     >
                       <span
-                        className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-300 ${
-                          hoveredProject === project.name
-                            ? 'text-foreground'
-                            : 'text-muted-foreground/70 group-hover:text-foreground'
-                        }`}
+                        className={`text-sm md:text-lg tracking-[0.1em] font-light ${hoveredProject === project.name
+                          ? 'text-foreground'
+                          : 'text-muted-foreground/70 group-hover:text-foreground'
+                          }`}
                       >
                         {project.name}
                       </span>
                     </button>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            </div>
           </div>
 
           {/* Right: sticky preview */}
           <div className="w-1/2 relative">
-            <div className="sticky top-24">
-              <AnimatePresence mode="wait">
-                {currentPreview && (
-                  <motion.div
-                    key={currentPreview.pathname}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="aspect-[4/5] overflow-hidden"
-                  >
-                    {currentPreview.type === 'video' ? (
-                      <video
-                        src={currentPreview.url}
-                        muted
-                        loop
-                        autoPlay
-                        playsInline
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <img
-                        src={currentPreview.url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="sticky top-24 h-[calc(100vh-160px)] flex items-center justify-center">
+              {currentPreview && (
+                <div
+                  className="w-full h-full flex items-center justify-center overflow-hidden"
+                >
+                  {currentPreview.type === 'video' ? (
+                    <video
+                      key={currentPreview.pathname}
+                      src={currentPreview.url}
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <img
+                      key={currentPreview.pathname}
+                      src={currentPreview.url}
+                      alt=""
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -231,6 +203,28 @@ const Work = () => {
       {/* MOBILE LAYOUT: list with scaled preview at bottom */}
       {isMobile && (
         <div className="relative" style={{ paddingBottom: '60vh' }}>
+          <div className="px-6 md:px-12 mb-12 md:mb-20">
+            <DrawingLine className="w-32 mb-6" delay={0} />
+            <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-8">
+              Work
+            </h1>
+
+            {/* Filter tabs */}
+            <div className="flex gap-6">
+              {filters.map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); }}
+                  className={`text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${filter === f.key
+                    ? 'text-foreground border-foreground'
+                    : 'text-muted-foreground/50 border-transparent hover:text-muted-foreground'
+                    }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
           {/* Project list */}
           <div className="px-6">
             {projects.map((project, index) => (
@@ -238,14 +232,13 @@ const Work = () => {
                 key={project.name}
                 ref={setItemRef(project.name)}
                 data-project={project.name}
-                className="border-b border-border/15 min-h-[15vh] flex items-center"
+                className="border-b border-border/15 min-h-0 flex items-center"
               >
-                <div className="py-5 text-left">
-                  <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-300 ${
-                    activePreview === project.name
-                      ? 'text-foreground'
-                      : 'text-muted-foreground/70'
-                  }`}>
+                <div className="py-1 text-left">
+                  <span className={`text-sm tracking-[0.1em] font-light ${activePreview === project.name
+                    ? 'text-foreground'
+                    : 'text-muted-foreground/70'
+                    }`}>
                     {project.name}
                   </span>
                 </div>
@@ -255,38 +248,32 @@ const Work = () => {
 
           {/* Fixed bottom preview — scaled/contained image, not full bleed */}
           <div className="fixed bottom-0 left-0 right-0 h-[40vh] flex items-center justify-center pointer-events-none z-10">
-            {/* Top gradient fade */}
-            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background to-transparent z-20" />
-            
-            <AnimatePresence mode="wait">
-              {currentPreview && (
-                <motion.div
-                  key={currentPreview.pathname}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="w-[60%] max-h-[36vh] overflow-hidden"
-                >
-                  {currentPreview.type === 'video' ? (
-                    <video
-                      src={currentPreview.url}
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <img
-                      src={currentPreview.url}
-                      alt=""
-                      className="w-full h-full object-contain"
-                    />
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+
+
+            {currentPreview && (
+              <div
+                className="w-[60%] max-h-[36vh] overflow-hidden"
+              >
+                {currentPreview.type === 'video' ? (
+                  <video
+                    key={currentPreview.pathname}
+                    src={currentPreview.url}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <img
+                    key={currentPreview.pathname}
+                    src={currentPreview.url}
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -302,7 +289,7 @@ const Work = () => {
 
       {projects.length > 0 && !isMobile && (
         <div className="mt-16 px-6 md:px-12">
-          <DrawingLine className="w-64" delay={0.5} />
+          <DrawingLine className="w-64" delay={0} />
         </div>
       )}
     </main>

@@ -40,8 +40,8 @@ export const PageLayout = ({ children }: PageLayoutProps) => {
   }, [location.pathname]);
 
   return (
-    <div className="bg-background text-foreground min-h-screen overflow-x-hidden">
-      <Noise patternAlpha={20} patternRefreshInterval={3} />
+    <div className="text-foreground min-h-screen overflow-x-hidden">
+      <Noise patternAlpha={100} patternRefreshInterval={3} />
       <CursorTrail />
       <Navigation onNavigate={handleNavigate} />
       <VHSTransition

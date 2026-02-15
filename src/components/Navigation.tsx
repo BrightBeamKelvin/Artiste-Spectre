@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
 const navItems = [
   { label: 'WORK', path: '/work' },
@@ -18,6 +18,11 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Scroll-driven effects
+  const { scrollY } = useScroll();
+  const headerBorderWidth = useTransform(scrollY, [60, 160], ['5rem', '100%']);
+  const headerBorderOpacity = useTransform(scrollY, [60, 61], [0, 1]);
+
   const handleClick = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
@@ -26,79 +31,93 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
   return (
     <>
-      {/* Left side - Brand */}
-      <motion.div
-        className="fixed top-6 left-6 md:left-12 z-50"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
+      <motion.header
+        className="fixed top-0 left-0 right-0 z-50 h-16 transition-colors duration-500"
+        style={{
+          backgroundColor: '#0D0D0D'
+        }}
       >
-        <Link
-          to="/"
-          onClick={(e) => handleClick(e, '/')}
-          className="text-[10px] uppercase tracking-[0.3em] font-light text-foreground hover:text-muted-foreground transition-colors duration-300"
-        >
-          ARTISTE SPECTRE
-        </Link>
-      </motion.div>
+        <div className="w-full h-full px-6 md:px-12 flex items-center justify-between relative">
+          {/* Brand */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <Link
+              to="/"
+              onClick={(e) => handleClick(e, '/')}
+              className="text-xs md:text-base uppercase tracking-[0.3em] font-medium text-white md:text-foreground hover:text-muted-foreground transition-colors duration-300 block"
+            >
+              ARTISTE SPECTRE
+            </Link>
+          </motion.div>
 
-      {/* Desktop Navigation */}
-      <nav className="fixed top-6 right-6 md:right-12 z-50 hidden md:block">
-        <ul className="flex gap-6 md:gap-8">
-          {navItems.map((item, index) => (
-            <motion.li
-              key={item.path}
+          {/* Nav Container (Desktop + Mobile Toggle) */}
+          <div className="flex items-center">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:block">
+              <ul className="flex gap-6 md:gap-8">
+                {navItems.map((item, index) => (
+                  <motion.li
+                    key={item.path}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                  >
+                    <Link
+                      to={item.path}
+                      onClick={(e) => handleClick(e, item.path)}
+                      onMouseEnter={() => setHoveredIndex(index)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                      className={`text-[10px] md:text-xs uppercase tracking-[0.3em] relative transition-colors duration-300 ${location.pathname === item.path
+                        ? 'text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                      {item.label}
+                      <motion.span
+                        className="absolute -bottom-1 left-0 h-px bg-foreground"
+                        initial={{ width: 0 }}
+                        animate={{
+                          width: hoveredIndex === index || location.pathname === item.path
+                            ? '100%'
+                            : 0
+                        }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </Link>
+                  </motion.li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Mobile Menu Toggle */}
+            <motion.button
+              className="md:hidden text-white flex items-center h-full"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
             >
-              <Link
-                to={item.path}
-                onClick={(e) => handleClick(e, item.path)}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-                className={`text-[10px] uppercase tracking-[0.3em] relative transition-colors duration-300 ${location.pathname === item.path
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                  }`}
-              >
-                {item.label}
-                <motion.span
-                  className="absolute -bottom-1 left-0 h-px bg-foreground"
-                  initial={{ width: 0 }}
-                  animate={{
-                    width: hoveredIndex === index || location.pathname === item.path
-                      ? '100%'
-                      : 0
-                  }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                />
-              </Link>
-            </motion.li>
-          ))}
-        </ul>
-      </nav>
+              <span className="text-[10px] tracking-[0.2em] font-light min-w-[3rem] text-right">
+                {mobileMenuOpen ? 'CLOSE' : 'MENU'}
+              </span>
+            </motion.button>
+          </div>
 
-      {/* Mobile Menu Toggle */}
-      <motion.button
-        className="fixed top-6 right-6 z-50 md:hidden text-foreground"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        aria-label="Toggle menu"
-      >
-        <span className="flex items-center">
-          <motion.span
-            className="text-[10px] tracking-[0.2em] font-light w-10 text-center"
-            initial={false}
-            animate={{ opacity: 1 }}
-            key={mobileMenuOpen ? 'close' : 'menu'}
-          >
-            {mobileMenuOpen ? 'CLOSE' : 'MENU'}
-          </motion.span>
-        </span>
-      </motion.button>
+          {/* Dynamic Header Border Line */}
+          <motion.div
+            className="absolute bottom-0 left-6 md:left-12 h-px bg-white/40 origin-left"
+            style={{
+              width: headerBorderWidth,
+              opacity: headerBorderOpacity,
+              left: useTransform(scrollY, [140, 160], ['1.5rem', '0rem'])
+            }}
+          />
+        </div>
+      </motion.header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -123,8 +142,8 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                     to={item.path}
                     onClick={(e) => handleClick(e, item.path)}
                     className={`text-2xl tracking-[0.4em] font-light transition-colors duration-300 ${location.pathname === item.path
-                        ? 'text-foreground'
-                        : 'text-muted-foreground'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground'
                       }`}
                   >
                     {item.label}
