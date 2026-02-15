@@ -13,7 +13,8 @@ const Work = () => {
   const [activePreview, setActivePreview] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const anchorY = useRef<number | null>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -27,49 +28,49 @@ const Work = () => {
     if (filter === 'albums') return data.albumCovers;
     return [...data.brandWork, ...data.albumCovers];
   })();
-
-  // Set first project as default active on mobile
+  // Capture the viewport Y position of the first item ONCE (fixed screen position)
   useEffect(() => {
-    if (isMobile && projects.length > 0 && !activePreview) {
-      setActivePreview(projects[0].name);
-    }
-  }, [isMobile, projects, activePreview]);
+    if (projects.length === 0) return;
+    requestAnimationFrame(() => {
+      if (anchorY.current === null) {
+        const firstEl = itemRefs.current.get(projects[0].name);
+        if (firstEl) {
+          anchorY.current = firstEl.getBoundingClientRect().top;
+        }
+      }
+      if (!activePreview) setActivePreview(projects[0].name);
+    });
+  }, [projects, filter]);
 
-  // Mobile: IntersectionObserver to track which project name is in center of screen
+  // Scroll handler: whichever item center is closest to the fixed anchor viewport Y
   useEffect(() => {
     if (!isMobile || projects.length === 0) return;
 
-    // Cleanup previous observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
+    const handleScroll = () => {
+      if (anchorY.current === null) return;
+      const fixedY = anchorY.current; // This is a constant viewport Y
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        // Find the most intersecting entry
-        let bestEntry: IntersectionObserverEntry | null = null;
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
-              bestEntry = entry;
-            }
-          }
+      let closestName: string | null = null;
+      let closestDist = Infinity;
+
+      itemRefs.current.forEach((el, name) => {
+        const rect = el.getBoundingClientRect();
+        const itemCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(itemCenter - fixedY);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestName = name;
         }
-        if (bestEntry) {
-          const name = bestEntry.target.getAttribute('data-project');
-          if (name) setActivePreview(name);
-        }
-      },
-      { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.5, 1] }
-    );
+      });
 
-    // Observe all current items
-    itemRefs.current.forEach((el) => {
-      observerRef.current?.observe(el);
-    });
+      if (closestName) {
+        setActivePreview(closestName);
+      }
+    };
 
-    return () => observerRef.current?.disconnect();
-  }, [isMobile, projects, filter]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile, projects]);
 
   const setItemRef = useCallback((name: string) => (el: HTMLDivElement | null) => {
     if (el) {
@@ -229,40 +230,27 @@ const Work = () => {
 
       {/* MOBILE LAYOUT: list with scaled preview at bottom */}
       {isMobile && (
-        <div className="relative pb-[45vh]">
+        <div className="relative" style={{ paddingBottom: '60vh' }}>
           {/* Project list */}
           <div className="px-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={filter}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+            {projects.map((project, index) => (
+              <div
+                key={project.name}
+                ref={setItemRef(project.name)}
+                data-project={project.name}
+                className="border-b border-border/15 min-h-[15vh] flex items-center"
               >
-                {projects.map((project, index) => (
-                  <motion.div
-                    key={project.name}
-                    ref={setItemRef(project.name)}
-                    data-project={project.name}
-                    className="border-b border-border/15"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                  >
-                    <div className="py-4 text-left">
-                      <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-300 ${
-                        activePreview === project.name
-                          ? 'text-foreground'
-                          : 'text-muted-foreground/70'
-                      }`}>
-                        {project.name}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                <div className="py-5 text-left">
+                  <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-300 ${
+                    activePreview === project.name
+                      ? 'text-foreground'
+                      : 'text-muted-foreground/70'
+                  }`}>
+                    {project.name}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Fixed bottom preview — scaled/contained image, not full bleed */}
