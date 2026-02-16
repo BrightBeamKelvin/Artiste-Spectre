@@ -9,17 +9,17 @@ interface TrailDot {
 
 export const CursorTrail = () => {
   const [trail, setTrail] = useState<TrailDot[]>([]);
-  
+
   useEffect(() => {
     let idCounter = 0;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       const newDot: TrailDot = {
         id: idCounter++,
         x: e.clientX,
         y: e.clientY,
       };
-      
+
       setTrail(prev => [...prev.slice(-8), newDot]);
     };
 
@@ -46,7 +46,7 @@ export const CursorTrail = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50">
+    <div className="fixed inset-0 pointer-events-none z-[10002]">
       <AnimatePresence>
         {trail.map((dot, index) => (
           <motion.div

@@ -47,7 +47,7 @@ export const VHSTransition = ({ isActive, onComplete, persist = false }: VHSTran
     <AnimatePresence>
       {isActive && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[10002] flex items-center justify-center overflow-hidden"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

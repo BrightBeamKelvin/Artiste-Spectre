@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DrawingLine } from '@/components/DrawingLine';
-import { useWorkData } from '@/hooks/useWorkData';
+import { ProjectDetail } from '@/components/ProjectDetail';
+import { useWorkData, WorkProject } from '@/hooks/useWorkData';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 type Filter = 'all' | 'brand' | 'albums';
@@ -11,6 +12,7 @@ const Work = () => {
   const [filter, setFilter] = useState<Filter>('all');
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const [activePreview, setActivePreview] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<WorkProject | null>(null);
   const isMobile = useIsMobile();
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const anchorY = useRef<number | null>(null);
@@ -89,8 +91,26 @@ const Work = () => {
 
   const currentPreview = getPreviewItem(isMobile ? activePreview : hoveredProject);
 
+  const handleProjectClick = (project: WorkProject) => {
+    setSelectedProject(project);
+  };
+
+  const handleNextProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = projects.findIndex(p => p.name === selectedProject.name);
+    const nextIndex = (currentIndex + 1) % projects.length;
+    setSelectedProject(projects[nextIndex]);
+  };
+
+  const handlePrevProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = projects.findIndex(p => p.name === selectedProject.name);
+    const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
+    setSelectedProject(projects[prevIndex]);
+  };
+
   return (
-    <main className="bg-background text-foreground min-h-screen pt-24 pb-16">
+    <main className="bg-background text-foreground min-h-screen pt-16 pb-16">
       {/* Loading */}
       {isLoading && (
         <div className="px-6 md:px-12 mb-8">
@@ -117,9 +137,9 @@ const Work = () => {
       {!isMobile && (
         <div className="px-6 md:px-12 flex gap-12">
           {/* Left: Header + project list */}
-          <div className="w-1/2 pt-0">
+          <div className="w-1/2 pt-8">
             <div className="mb-12 md:mb-20">
-              <DrawingLine className="w-32 mb-6" delay={0} />
+              <div className="bg-border h-px w-32 mb-6" />
               <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-8">
                 Work
               </h1>
@@ -152,6 +172,7 @@ const Work = () => {
                       className="w-full py-1 md:py-1.5 text-left group"
                       onMouseEnter={() => setHoveredProject(project.name)}
                       onMouseLeave={() => setHoveredProject(null)}
+                      onClick={() => handleProjectClick(project)}
                     >
                       <span
                         className={`text-sm md:text-lg tracking-[0.1em] font-light ${hoveredProject === project.name
@@ -168,34 +189,35 @@ const Work = () => {
             </div>
           </div>
 
-          {/* Right: sticky preview */}
-          <div className="w-1/2 relative">
-            <div className="sticky top-24 h-[calc(100vh-160px)] flex items-center justify-center">
-              {currentPreview && (
-                <div
-                  className="w-full h-full flex items-center justify-center overflow-hidden"
-                >
-                  {currentPreview.type === 'video' ? (
-                    <video
-                      key={currentPreview.pathname}
-                      src={currentPreview.url}
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  ) : (
-                    <img
-                      key={currentPreview.pathname}
-                      src={currentPreview.url}
-                      alt=""
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  )}
-                </div>
-              )}
-            </div>
+          {/* Right: spacer for layout */}
+          <div className="w-1/2" />
+
+          {/* Right: fixed preview */}
+          <div className="fixed top-16 right-0 h-[calc(100vh-4rem)] w-1/2 pr-12 pl-6 flex items-center justify-center z-[10000] pointer-events-none">
+            {currentPreview && (
+              <div
+                className="w-full h-full flex items-center justify-center overflow-hidden"
+              >
+                {currentPreview.type === 'video' ? (
+                  <video
+                    key={currentPreview.pathname}
+                    src={currentPreview.url}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    className="max-h-[90%] max-w-full object-contain"
+                  />
+                ) : (
+                  <img
+                    key={currentPreview.pathname}
+                    src={currentPreview.url}
+                    alt=""
+                    className="max-h-[90%] max-w-full object-contain"
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -204,7 +226,7 @@ const Work = () => {
       {isMobile && (
         <div className="relative" style={{ paddingBottom: '60vh' }}>
           <div className="px-6 md:px-12 mb-12 md:mb-20">
-            <DrawingLine className="w-32 mb-6" delay={0} />
+            <div className="bg-border h-px w-32 mb-6" />
             <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-8">
               Work
             </h1>
@@ -234,7 +256,10 @@ const Work = () => {
                 data-project={project.name}
                 className="min-h-0 flex items-center"
               >
-                <div className="py-1 text-left">
+                <div
+                  className="py-1 text-left w-full"
+                  onClick={() => handleProjectClick(project)}
+                >
                   <span className={`text-sm tracking-[0.1em] font-light ${activePreview === project.name
                     ? 'text-foreground'
                     : 'text-muted-foreground/70'
@@ -247,12 +272,16 @@ const Work = () => {
           </div>
 
           {/* Fixed bottom preview — scaled/contained image, not full bleed */}
-          <div className="fixed bottom-0 left-0 right-0 h-[40vh] flex items-center justify-center pointer-events-none z-10">
+          <div className="fixed bottom-0 left-0 right-0 h-[40vh] flex items-center justify-center pointer-events-none z-[10000]">
 
 
             {currentPreview && (
               <div
                 className="w-[60%] max-h-[36vh] overflow-hidden"
+                onClick={() => {
+                  const proj = projects.find(p => p.name === activePreview);
+                  if (proj) handleProjectClick(proj);
+                }}
               >
                 {currentPreview.type === 'video' ? (
                   <video
@@ -262,14 +291,14 @@ const Work = () => {
                     loop
                     autoPlay
                     playsInline
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain pointer-events-auto"
                   />
                 ) : (
                   <img
                     key={currentPreview.pathname}
                     src={currentPreview.url}
                     alt=""
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain pointer-events-auto"
                   />
                 )}
               </div>
@@ -289,9 +318,21 @@ const Work = () => {
 
       {projects.length > 0 && !isMobile && (
         <div className="mt-16 px-6 md:px-12">
-          <DrawingLine className="w-64" delay={0} />
+          <div className="bg-border h-px w-64" />
         </div>
       )}
+
+      {/* Project Detail Overlay */}
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectDetail
+            project={selectedProject}
+            onClose={() => setSelectedProject(null)}
+            onNext={handleNextProject}
+            onPrev={handlePrevProject}
+          />
+        )}
+      </AnimatePresence>
     </main>
   );
 };

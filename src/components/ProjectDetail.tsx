@@ -1,0 +1,168 @@
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { WorkProject } from '@/hooks/useWorkData';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+
+interface ProjectDetailProps {
+    project: WorkProject;
+    onClose: () => void;
+    onNext: () => void;
+    onPrev: () => void;
+}
+
+export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetailProps) => {
+    const isMobile = useIsMobile();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Handle navigation: Internal scroll first, then project switch
+    const handleNext = () => {
+        if (!containerRef.current) return;
+        const width = containerRef.current.clientWidth;
+        const maxScroll = containerRef.current.scrollWidth - width;
+        const currentScroll = containerRef.current.scrollLeft;
+
+        // If not at the end, scroll to next item
+        if (currentScroll < maxScroll - 10) { // -10 for rounding buffer
+            containerRef.current.scrollBy({ left: width, behavior: 'smooth' });
+        } else {
+            // At end, go to next project
+            onNext();
+        }
+    };
+
+    const handlePrev = () => {
+        if (!containerRef.current) return;
+        const width = containerRef.current.clientWidth;
+        const currentScroll = containerRef.current.scrollLeft;
+
+        // If not at the start, scroll to prev item
+        if (currentScroll > 10) { // 10 for rounding buffer
+            containerRef.current.scrollBy({ left: -width, behavior: 'smooth' });
+        } else {
+            // At start, go to prev project
+            onPrev();
+        }
+    };
+
+    // Handle keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+            if (e.key === 'ArrowRight') handleNext();
+            if (e.key === 'ArrowLeft') handlePrev();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose, onNext, onPrev]);
+
+    // Handle horizontal scroll snap detection for index update
+    const handleScroll = () => {
+        if (!containerRef.current) return;
+        const scrollLeft = containerRef.current.scrollLeft;
+        const width = containerRef.current.clientWidth;
+        const index = Math.round(scrollLeft / width);
+        setCurrentIndex(index);
+    };
+
+    return (
+        <motion.div
+            className="fixed inset-0 z-[10001] bg-background text-foreground flex flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+            {/* Header / Controls */}
+            <div className="absolute top-0 left-0 right-0 h-16 px-6 md:px-12 flex items-center justify-between z-50 pointer-events-none">
+                {/* Spacer to balance Close button */}
+                <div className="w-10"></div>
+
+                {/* Navigation Arrows (Desktop) - Center or specific placement? */}
+                {/* Keeping strict to reference: Navigation is often implicitly scroll or edge clicks. 
+            We'll add explicit buttons for clarity if needed, but reference has 'Next Project' at end of scroll.
+            Let's stick to clean overlay first.
+        */}
+
+                <button
+                    onClick={onClose}
+                    className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+            </div>
+
+            {/* Main Content - Horizontal Scroll Snap Carousel */}
+            <div
+                ref={containerRef}
+                className="flex-1 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide items-center"
+                onScroll={handleScroll}
+            >
+                {/* Horizontal spacer for centering first item if needed? 
+            No, reference has full width items or centered items.
+        */}
+
+                {project.media.map((media, index) => (
+                    <div
+                        key={media.pathname}
+                        className="w-full h-full flex-shrink-0 snap-center flex items-center justify-center p-4 md:p-12"
+                    >
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            {media.type === 'video' ? (
+                                <video
+                                    src={media.url}
+                                    muted
+                                    loop
+                                    autoPlay
+                                    playsInline
+                                    className="max-w-full max-h-full object-contain shadow-2xl"
+                                />
+                            ) : (
+                                <img
+                                    src={media.url}
+                                    alt={`${project.name} - ${index + 1}`}
+                                    className="max-w-full max-h-full object-contain shadow-2xl"
+                                />
+                            )}
+                        </div>
+                    </div>
+                ))}
+
+                {/* "Next Project" Slide/Actions could go here */}
+            </div>
+
+            {/* Footer Info */}
+            <div className="absolute bottom-6 md:bottom-8 left-0 right-0 px-6 md:px-12 flex justify-between items-end pointer-events-none text-xs md:text-sm tracking-[0.2em] font-mono">
+                <div className="text-muted-foreground">
+                    {project.category}
+                </div>
+
+                <div className="absolute left-1/2 -translate-x-1/2 text-center">
+                    <span className="text-foreground">{project.name}</span>
+                </div>
+
+                <div className="text-muted-foreground">
+                    {currentIndex + 1} / {project.media.length}
+                </div>
+            </div>
+
+            {/* Click zones for Previous/Next Project (Desktop) */}
+            {!isMobile && (
+                <>
+                    <div className="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-auto">
+                        <button onClick={handlePrev} className="p-4 hover:opacity-50 transition-opacity">
+                            <ArrowLeft className="w-6 h-6" />
+                        </button>
+                    </div>
+                    <div className="absolute top-1/2 right-4 -translate-y-1/2 pointer-events-auto">
+                        <button onClick={handleNext} className="p-4 hover:opacity-50 transition-opacity">
+                            <ArrowRight className="w-6 h-6" />
+                        </button>
+                    </div>
+                </>
+            )}
+
+        </motion.div>
+    );
+};

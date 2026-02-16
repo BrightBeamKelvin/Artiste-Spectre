@@ -22,6 +22,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
   const { scrollY } = useScroll();
   const headerBorderWidth = useTransform(scrollY, [60, 160], ['5rem', '100%']);
   const headerBorderOpacity = useTransform(scrollY, [60, 61], [0, 1]);
+  const headerBorderLeft = useTransform(scrollY, [140, 160], ['1.5rem', '0rem']);
 
   const handleClick = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -31,15 +32,12 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
   return (
     <>
-      <motion.header
+      <header
         className="fixed top-0 left-0 right-0 z-50 h-16 transition-colors duration-500 bg-background"
       >
         <div className="w-full h-full px-6 md:px-12 flex items-center justify-between relative">
           {/* Brand */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+          <div
           >
             <Link
               to="/"
@@ -48,7 +46,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
             >
               ARTISTE SPECTRE
             </Link>
-          </motion.div>
+          </div>
 
           {/* Nav Container (Desktop + Mobile Toggle) */}
           <div className="flex items-center">
@@ -56,11 +54,8 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
             <nav className="hidden md:block">
               <ul className="flex gap-6 md:gap-8">
                 {navItems.map((item, index) => (
-                  <motion.li
+                  <li
                     key={item.path}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
                   >
                     <Link
                       to={item.path}
@@ -84,43 +79,44 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       />
                     </Link>
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
             </nav>
 
             {/* Mobile Menu Toggle */}
-            <motion.button
+            <button
               className="md:hidden text-white flex items-center h-full"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
               <span className="text-[10px] tracking-[0.2em] font-light min-w-[3rem] text-right">
                 {mobileMenuOpen ? 'CLOSE' : 'MENU'}
               </span>
-            </motion.button>
+            </button>
           </div>
 
           {/* Dynamic Header Border Line */}
-          <motion.div
-            className="absolute bottom-0 left-6 md:left-12 h-px bg-white/40 origin-left"
-            style={{
-              width: headerBorderWidth,
-              opacity: headerBorderOpacity,
-              left: useTransform(scrollY, [140, 160], ['1.5rem', '0rem'])
-            }}
-          />
+          {location.pathname === '/work' ? (
+            <div className="absolute bottom-0 inset-x-0 h-px bg-zinc-800" />
+          ) : (
+            <motion.div
+              className="absolute bottom-0 left-6 md:left-12 h-px bg-white/40 origin-left"
+              style={{
+                width: headerBorderWidth,
+                opacity: headerBorderOpacity,
+                left: headerBorderLeft
+              }}
+            />
+          )}
         </div>
-      </motion.header>
+      </header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 z-40 bg-background md:hidden"
+            className="fixed inset-0 z-[10001] bg-background md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
