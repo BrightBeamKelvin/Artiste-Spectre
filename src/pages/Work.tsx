@@ -146,7 +146,7 @@ const Work = () => {
                 {projects.map((project, index) => (
                   <div
                     key={project.name}
-                    className="border-b border-border/15"
+                    className=""
                   >
                     <button
                       className="w-full py-1 md:py-1.5 text-left group"
@@ -232,7 +232,7 @@ const Work = () => {
                 key={project.name}
                 ref={setItemRef(project.name)}
                 data-project={project.name}
-                className="border-b border-border/15 min-h-0 flex items-center"
+                className="min-h-0 flex items-center"
               >
                 <div className="py-1 text-left">
                   <span className={`text-sm tracking-[0.1em] font-light ${activePreview === project.name

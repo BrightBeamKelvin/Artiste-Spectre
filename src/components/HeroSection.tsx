@@ -95,11 +95,8 @@ export const HeroSection = () => {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: showSubtext ? 1 : 0, x: showSubtext ? 0 : -10 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="md:max-w-md ml-0 md:ml-auto mr-0 md:mr-[10%] lg:mr-[15%] text-left md:text-right mb-12 md:mb-16 flex items-start md:block"
+          className="md:max-w-md ml-auto mr-0 md:mr-0 text-right md:text-right mb-12 md:mb-16 block"
         >
-          {/* Vertical line accent for mobile */}
-          <div className="md:hidden w-px h-24 bg-white/40 mr-4 mt-1 shrink-0" />
-
           <div className="space-y-1 md:space-y-2">
             <p className="leading-relaxed text-muted-foreground text-xs md:text-base">
               Creator-led creative <br className="md:hidden" /> & production agency.
