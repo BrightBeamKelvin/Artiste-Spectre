@@ -98,7 +98,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
           {/* Dynamic Header Border Line */}
           {location.pathname === '/work' ? (
-            <div className="absolute bottom-0 inset-x-0 h-px bg-zinc-800" />
+            <div className="absolute bottom-0 inset-x-0 h-px bg-white/40" />
           ) : (
             <motion.div
               className="absolute bottom-0 left-6 md:left-12 h-px bg-white/40 origin-left"

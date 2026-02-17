@@ -62,6 +62,7 @@
   html {
     scroll-behavior: smooth;
     background-color: hsl(var(--background));
+    overscroll-behavior: none;
   }
 
   body {

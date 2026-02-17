@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DrawingLine } from '@/components/DrawingLine';
 import { ProjectDetail } from '@/components/ProjectDetail';
@@ -17,6 +17,10 @@ const Work = () => {
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const anchorY = useRef<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
+  const mobileContainerRef = useRef<HTMLDivElement>(null);
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+  const touchStartYRef = useRef(0);
+  const touchDeltaRef = useRef(0);
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -24,55 +28,123 @@ const Work = () => {
     { key: 'albums', label: 'Album Covers' },
   ];
 
-  const projects = (() => {
+  const projects = useMemo(() => {
     if (!data) return [];
     if (filter === 'brand') return data.brandWork;
     if (filter === 'albums') return data.albumCovers;
     return [...data.brandWork, ...data.albumCovers];
-  })();
-  // Capture the viewport Y position of the first item ONCE (fixed screen position)
+  }, [data, filter]);
+  // Set initial active preview
   useEffect(() => {
     if (projects.length === 0) return;
-    requestAnimationFrame(() => {
-      if (anchorY.current === null) {
-        const firstEl = itemRefs.current.get(projects[0].name);
-        if (firstEl) {
-          anchorY.current = firstEl.getBoundingClientRect().top;
+    if (!isMobile) {
+      // Desktop: capture anchor Y for scroll-based detection
+      requestAnimationFrame(() => {
+        if (anchorY.current === null) {
+          const firstEl = itemRefs.current.get(projects[0].name);
+          if (firstEl) {
+            anchorY.current = firstEl.getBoundingClientRect().top;
+          }
         }
-      }
-      if (!activePreview) setActivePreview(projects[0].name);
-    });
-  }, [projects, filter]);
+        if (!activePreview) setActivePreview(projects[0].name);
+      });
+    } else {
+      // Mobile: set preview from active index
+      setMobileActiveIndex(0);
+      setActivePreview(projects[0].name);
+    }
+  }, [data, filter, isMobile]);
 
-  // Scroll handler: whichever item center is closest to the fixed anchor viewport Y
+  // Mobile: intercept touch/wheel events for virtual index-based scrolling
   useEffect(() => {
     if (!isMobile || projects.length === 0) return;
+    const container = mobileContainerRef.current;
+    if (!container) return;
 
-    const handleScroll = () => {
-      if (anchorY.current === null) return;
-      const fixedY = anchorY.current; // This is a constant viewport Y
+    const SWIPE_THRESHOLD = 35; // pixels of touch movement to advance one item
 
-      let closestName: string | null = null;
-      let closestDist = Infinity;
-
-      itemRefs.current.forEach((el, name) => {
-        const rect = el.getBoundingClientRect();
-        const itemCenter = rect.top + rect.height / 2;
-        const dist = Math.abs(itemCenter - fixedY);
-        if (dist < closestDist) {
-          closestDist = dist;
-          closestName = name;
-        }
+    const advanceIndex = (direction: number) => {
+      setMobileActiveIndex(prev => {
+        const next = Math.max(0, Math.min(projects.length - 1, prev + direction));
+        return next;
       });
+    };
 
-      if (closestName) {
-        setActivePreview(closestName);
+    // Touch handling
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartYRef.current = e.touches[0].clientY;
+      touchDeltaRef.current = 0;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const currentY = e.touches[0].clientY;
+      const delta = touchStartYRef.current - currentY;
+      touchStartYRef.current = currentY;
+      touchDeltaRef.current += delta;
+
+      while (Math.abs(touchDeltaRef.current) >= SWIPE_THRESHOLD) {
+        const dir = Math.sign(touchDeltaRef.current);
+        touchDeltaRef.current -= dir * SWIPE_THRESHOLD;
+        advanceIndex(dir);
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile, projects]);
+    // Wheel handling (for desktop mobile-emulation / trackpad)
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      touchDeltaRef.current += e.deltaY;
+
+      while (Math.abs(touchDeltaRef.current) >= SWIPE_THRESHOLD) {
+        const dir = Math.sign(touchDeltaRef.current);
+        touchDeltaRef.current -= dir * SWIPE_THRESHOLD;
+        advanceIndex(dir);
+      }
+    };
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [isMobile, projects.length]);
+
+  // Mobile: sync active index → preview + programmatic scroll position
+  useEffect(() => {
+    if (!isMobile || projects.length === 0) return;
+    const listEl = listContainerRef.current;
+    if (!listEl) return;
+
+    // Update the preview
+    setActivePreview(projects[mobileActiveIndex]?.name ?? null);
+
+    // Calculate scroll position for three-phase behavior
+    const items = listEl.querySelectorAll('[data-project]') as NodeListOf<HTMLElement>;
+    if (items.length === 0) return;
+
+    const itemHeight = items[0].offsetHeight;
+    const containerHeight = listEl.clientHeight;
+    const visibleCount = Math.floor(containerHeight / itemHeight);
+    const midpoint = Math.floor(visibleCount / 2);
+    const maxScroll = listEl.scrollHeight - containerHeight;
+
+    // Phase 1: index < midpoint → scrollTop = 0 (highlight moves, list stays)
+    // Phase 2: midpoint <= index <= (total - visible + midpoint) → scroll to center
+    // Phase 3: index near end → scrollTop = max (highlight moves, list stays)
+    let targetScroll: number;
+    if (mobileActiveIndex <= midpoint) {
+      targetScroll = 0;
+    } else {
+      targetScroll = (mobileActiveIndex - midpoint) * itemHeight;
+    }
+    targetScroll = Math.max(0, Math.min(maxScroll, targetScroll));
+
+    listEl.scrollTop = targetScroll;
+  }, [mobileActiveIndex, isMobile, projects]);
 
   const setItemRef = useCallback((name: string) => (el: HTMLDivElement | null) => {
     if (el) {
@@ -222,12 +294,13 @@ const Work = () => {
         </div>
       )}
 
-      {/* MOBILE LAYOUT: list with scaled preview at bottom */}
+      {/* MOBILE LAYOUT: fixed viewport split — list scrolls internally */}
       {isMobile && (
-        <div className="relative" style={{ paddingBottom: '60vh' }}>
-          <div className="px-6 md:px-12 mb-12 md:mb-20">
+        <div ref={mobileContainerRef} className="fixed inset-0 top-16 flex flex-col touch-none">
+          {/* Header area */}
+          <div className="px-6 pt-8 pb-4 flex-shrink-0">
             <div className="bg-border h-px w-32 mb-6" />
-            <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-8">
+            <h1 className="text-3xl font-light tracking-tight mb-8">
               Work
             </h1>
 
@@ -236,8 +309,8 @@ const Work = () => {
               {filters.map((f) => (
                 <button
                   key={f.key}
-                  onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); }}
-                  className={`text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${filter === f.key
+                  onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); setMobileActiveIndex(0); }}
+                  className={`text-[10px] uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${filter === f.key
                     ? 'text-foreground border-foreground'
                     : 'text-muted-foreground/50 border-transparent hover:text-muted-foreground'
                     }`}
@@ -247,9 +320,13 @@ const Work = () => {
               ))}
             </div>
           </div>
-          {/* Project list */}
-          <div className="px-6">
-            {projects.map((project, index) => (
+
+          {/* Project list — overflow hidden, scroll controlled programmatically */}
+          <div
+            ref={listContainerRef}
+            className="flex-1 overflow-hidden px-6 min-h-0"
+          >
+            {projects.map((project) => (
               <div
                 key={project.name}
                 ref={setItemRef(project.name)}
@@ -271,10 +348,8 @@ const Work = () => {
             ))}
           </div>
 
-          {/* Fixed bottom preview — scaled/contained image, not full bleed */}
-          <div className="fixed bottom-0 left-0 right-0 h-[40vh] flex items-center justify-center pointer-events-none z-[10000]">
-
-
+          {/* Bottom preview */}
+          <div className="flex-shrink-0 h-[40vh] flex items-center justify-center pointer-events-none">
             {currentPreview && (
               <div
                 className="w-[60%] max-h-[36vh] overflow-hidden"

@@ -16,6 +16,14 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
     const containerRef = useRef<HTMLDivElement>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    // Reset scroll position and index when the project changes
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollLeft = 0;
+        }
+        setCurrentIndex(0);
+    }, [project.name]);
+
     // Handle navigation: Internal scroll first, then project switch
     const handleNext = () => {
         if (!containerRef.current) return;
@@ -76,8 +84,10 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         >
             {/* Header / Controls */}
             <div className="absolute top-0 left-0 right-0 h-16 px-6 md:px-12 flex items-center justify-between z-50 pointer-events-none">
-                {/* Spacer to balance Close button */}
-                <div className="w-10"></div>
+                {/* Project name */}
+                <span className="text-xs tracking-[0.2em] font-light text-foreground truncate max-w-[60%]">
+                    {project.name}
+                </span>
 
                 {/* Navigation Arrows (Desktop) - Center or specific placement? */}
                 {/* Keeping strict to reference: Navigation is often implicitly scroll or edge clicks. 
