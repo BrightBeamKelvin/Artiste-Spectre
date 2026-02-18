@@ -109,10 +109,10 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
           {/* Dynamic Header Border Line */}
           {location.pathname === '/work' ? (
-            <div className="absolute bottom-0 inset-x-0 h-[0.5px] bg-white" />
+            <div className="absolute bottom-0 inset-x-0 h-[0.5px] bg-white/50" />
           ) : (
             <motion.div
-              className="absolute bottom-0 left-6 md:left-12 h-[0.5px] bg-white origin-left"
+              className="absolute bottom-0 left-6 md:left-12 h-[0.5px] bg-white/50 origin-left"
               style={{
                 width: headerBorderWidth,
                 opacity: headerBorderOpacity,

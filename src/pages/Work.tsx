@@ -15,7 +15,7 @@ const Work = () => {
   const [selectedProject, setSelectedProject] = useState<WorkProject | null>(null);
   const isMobile = useIsMobile();
   const [mobileView, setMobileView] = useState<'index' | 'grid'>('grid');
-  const [desktopView, setDesktopView] = useState<'index' | 'grid'>('index');
+  const [desktopView, setDesktopView] = useState<'index' | 'grid'>('grid');
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const anchorY = useRef<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -163,7 +163,7 @@ const Work = () => {
           <div className="px-6 md:px-12 pt-8 flex justify-start">
             <button
               onClick={() => { setDesktopView(desktopView === 'index' ? 'grid' : 'index'); window.scrollTo(0, 0); }}
-              className="text-xs uppercase tracking-[0.2em] text-muted-foreground/50 hover:text-foreground transition-colors duration-300 pb-1 border-b border-transparent hover:border-foreground"
+              className="text-xs uppercase tracking-[0.2em] text-foreground/80 hover:text-foreground transition-colors duration-300 pb-1 border-b border-transparent hover:border-foreground"
             >
               {desktopView === 'index' ? 'Grid' : 'Index'}
             </button>
