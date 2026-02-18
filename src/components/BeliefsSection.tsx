@@ -12,7 +12,7 @@ const beliefs = [
 
 export const BeliefsSection = () => {
   return (
-    <section className="min-h-screen flex flex-col justify-center py-16 md:py-24">
+    <section className="flex flex-col justify-center py-16 md:py-32 md:min-h-screen">
       <div className="w-full max-w-5xl mx-auto px-6 md:px-12">
         <DrawingLine className="w-32 mb-20" delay={0.2} />
 

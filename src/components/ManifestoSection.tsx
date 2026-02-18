@@ -16,7 +16,7 @@ const manifestoLines = [
 
 export const ManifestoSection = () => {
   return (
-    <section className="min-h-screen flex flex-col justify-center py-16 md:py-24 overflow-hidden">
+    <section className="flex flex-col justify-center py-16 md:py-32 md:min-h-screen overflow-hidden">
       <div className="w-full max-w-[90rem] ml-auto px-6 md:px-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-12">
 
