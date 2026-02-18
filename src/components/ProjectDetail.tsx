@@ -16,7 +16,7 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
     const containerRef = useRef<HTMLDivElement>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    // Reset scroll position and index when the project changes
+    // Sync scroll position when project changes
     useEffect(() => {
         if (containerRef.current) {
             containerRef.current.scrollLeft = 0;
@@ -24,21 +24,33 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         setCurrentIndex(0);
     }, [project.name]);
 
-    // Handle navigation: Internal index switch first, then project switch
     const handleNext = () => {
-        if (currentIndex < project.media.length - 1) {
-            setCurrentIndex(prev => prev + 1);
+        if (!containerRef.current) return;
+        const width = containerRef.current.clientWidth;
+        const currentScroll = containerRef.current.scrollLeft;
+        const maxScroll = containerRef.current.scrollWidth - width;
+
+        if (currentScroll < maxScroll - 10) {
+            containerRef.current.scrollTo({
+                left: (Math.round(currentScroll / width) + 1) * width,
+                behavior: 'smooth'
+            });
         } else {
-            // At end, go to next project
             onNext();
         }
     };
 
     const handlePrev = () => {
-        if (currentIndex > 0) {
-            setCurrentIndex(prev => prev - 1);
+        if (!containerRef.current) return;
+        const width = containerRef.current.clientWidth;
+        const currentScroll = containerRef.current.scrollLeft;
+
+        if (currentScroll > 10) {
+            containerRef.current.scrollTo({
+                left: (Math.round(currentScroll / width) - 1) * width,
+                behavior: 'smooth'
+            });
         } else {
-            // At start, go to prev project
             onPrev();
         }
     };
@@ -52,7 +64,17 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [currentIndex, project.media.length, onClose, onNext, onPrev]);
+    }, [onClose, onNext, onPrev]);
+
+    const handleScroll = () => {
+        if (!containerRef.current) return;
+        const scrollLeft = containerRef.current.scrollLeft;
+        const width = containerRef.current.clientWidth;
+        const newIndex = Math.round(scrollLeft / width);
+        if (newIndex !== currentIndex) {
+            setCurrentIndex(newIndex);
+        }
+    };
 
     // Background Scroll Lock
     useEffect(() => {
@@ -87,53 +109,37 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
                 </button>
             </div>
 
-            {/* Main Content - Framer Motion Transform Carousel */}
-            <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-                <motion.div
-                    className="flex h-full w-full"
-                    initial={false}
-                    animate={{ x: `-${currentIndex * 100}%` }}
-                    transition={{
-                        type: "spring",
-                        damping: 30,
-                        stiffness: 200,
-                        mass: 1
-                    }}
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.2}
-                    onDragEnd={(_, info) => {
-                        const threshold = 50;
-                        if (info.offset.x < -threshold) handleNext();
-                        else if (info.offset.x > threshold) handlePrev();
-                    }}
-                >
-                    {project.media.map((media, index) => (
-                        <div
-                            key={media.pathname}
-                            className="w-full h-full flex-shrink-0 flex items-center justify-center px-4 py-20 md:px-12 md:py-24"
-                        >
-                            <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
-                                {media.type === 'video' ? (
-                                    <video
-                                        src={media.url}
-                                        muted
-                                        loop
-                                        autoPlay={index === currentIndex}
-                                        playsInline
-                                        className="max-w-full max-h-full object-contain shadow-2xl"
-                                    />
-                                ) : (
-                                    <img
-                                        src={media.url}
-                                        alt={`${project.name} - ${index + 1}`}
-                                        className="max-w-full max-h-full object-contain shadow-2xl"
-                                    />
-                                )}
-                            </div>
+            {/* Main Content - Horizontal Scroll Snap */}
+            <div
+                ref={containerRef}
+                className="flex-1 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide items-center"
+                onScroll={handleScroll}
+            >
+                {project.media.map((media, index) => (
+                    <div
+                        key={media.pathname}
+                        className="w-full h-full flex-shrink-0 snap-center flex items-center justify-center px-4 py-20 md:px-12 md:py-24"
+                    >
+                        <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
+                            {media.type === 'video' ? (
+                                <video
+                                    src={media.url}
+                                    muted
+                                    loop
+                                    autoPlay={index === currentIndex}
+                                    playsInline
+                                    className="max-w-full max-h-full object-contain shadow-2xl"
+                                />
+                            ) : (
+                                <img
+                                    src={media.url}
+                                    alt={`${project.name} - ${index + 1}`}
+                                    className="max-w-full max-h-full object-contain shadow-2xl"
+                                />
+                            )}
                         </div>
-                    ))}
-                </motion.div>
+                    </div>
+                ))}
             </div>
 
             {/* Footer Info */}
