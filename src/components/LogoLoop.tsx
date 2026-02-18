@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import './LogoLoop.css';
 
 export type LogoItem =
@@ -8,6 +9,7 @@ export type LogoItem =
         title?: string;
         ariaLabel?: string;
         type?: 'image' | 'video';
+        noInvert?: boolean;
     }
     | {
         src: string;
@@ -19,6 +21,7 @@ export type LogoItem =
         width?: number;
         height?: number;
         type?: 'image' | 'video';
+        noInvert?: boolean;
     };
 
 export interface LogoLoopProps {
@@ -209,6 +212,7 @@ export const LogoLoop = React.memo<LogoLoopProps>(
         const [seqHeight, setSeqHeight] = useState<number>(0);
         const [copyCount, setCopyCount] = useState<number>(ANIMATION_CONFIG.MIN_COPIES);
         const [isHovered, setIsHovered] = useState<boolean>(false);
+        const isMobile = useIsMobile();
 
         const effectiveHoverSpeed = useMemo(() => {
             if (hoverSpeed !== undefined) return hoverSpeed;
@@ -287,11 +291,11 @@ export const LogoLoop = React.memo<LogoLoopProps>(
         );
 
         const handleMouseEnter = useCallback(() => {
-            if (effectiveHoverSpeed !== undefined) setIsHovered(true);
-        }, [effectiveHoverSpeed]);
+            if (!isMobile && effectiveHoverSpeed !== undefined) setIsHovered(true);
+        }, [effectiveHoverSpeed, isMobile]);
         const handleMouseLeave = useCallback(() => {
-            if (effectiveHoverSpeed !== undefined) setIsHovered(false);
-        }, [effectiveHoverSpeed]);
+            if (!isMobile && effectiveHoverSpeed !== undefined) setIsHovered(false);
+        }, [effectiveHoverSpeed, isMobile]);
 
         const renderLogoItem = useCallback(
             (item: LogoItem, key: React.Key) => {
@@ -317,7 +321,7 @@ export const LogoLoop = React.memo<LogoLoopProps>(
                         autoPlay
                         playsInline
                         draggable={false}
-                        className="logoloop__video"
+                        className={`logoloop__video ${(item as any).noInvert ? 'logoloop--no-invert' : ''}`}
                     />
                 ) : (
                     <img
@@ -331,6 +335,7 @@ export const LogoLoop = React.memo<LogoLoopProps>(
                         loading="lazy"
                         decoding="async"
                         draggable={false}
+                        className={(item as any).noInvert ? 'logoloop--no-invert' : ''}
                     />
                 );
                 const itemAriaLabel = isNodeItem

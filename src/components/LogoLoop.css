@@ -84,9 +84,23 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.logoloop__item img,
 .logoloop__video {
-    mix-blend-mode: screen;
-    filter: contrast(1.5) brightness(1.2);
+    mix-blend-mode: lighten;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform, filter;
+}
+
+.logoloop__item img,
+.logoloop__video {
+    filter: contrast(1.2) brightness(1.1);
+}
+
+/* Ensure logos that shouldn't be inverted have high contrast to keep blacks pure for blending */
+.logoloop--no-invert {
+    filter: contrast(1.1) brightness(1) !important;
 }
 
 .logoloop--scale-hover .logoloop__item {
@@ -170,7 +184,7 @@
             rgba(0, 0, 0, 0) 100%);
 }
 
-.logoloop--invert img,
+.logoloop--invert img:not(.logoloop--no-invert),
 .logoloop--invert .logoloop__node {
     filter: invert(1) brightness(2);
 }

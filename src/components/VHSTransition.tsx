@@ -43,6 +43,31 @@ export const VHSTransition = ({ isActive, onComplete, persist = false }: VHSTran
     }
   }, [isActive, onComplete, persist]);
 
+  const [animatedFontSize, setAnimatedFontSize] = useState(5);
+
+  useEffect(() => {
+    if (isActive && isMobile) {
+      const duration = 1000; // 1 second cycle
+      const startSize = 8;
+      const endSize = 2;
+      let startTime = Date.now();
+
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Linear interpolation from 5 to 1
+        const newSize = startSize + (endSize - startSize) * progress;
+        setAnimatedFontSize(newSize);
+
+        if (progress >= 1) {
+          // Restart cycle or stay at 1? The user said "cycle", so I'll restart it.
+          startTime = Date.now();
+        }
+      }, 50);
+      return () => clearInterval(interval);
+    }
+  }, [isActive, isMobile]);
+
   return (
     <AnimatePresence>
       {isActive && (
@@ -73,9 +98,9 @@ export const VHSTransition = ({ isActive, onComplete, persist = false }: VHSTran
               <ASCIIText
                 text="ARTISTE SPECTRE"
                 enableWaves={false}
-                asciiFontSize={isMobile ? 2 : 4}
+                asciiFontSize={isMobile ? animatedFontSize : 4}
                 textFontSize={isMobile ? 20 : 20}
-                planeBaseHeight={isMobile ? 4 : 6}
+                planeBaseHeight={isMobile ? 6 : 6}
               />
             )}
           </motion.div>

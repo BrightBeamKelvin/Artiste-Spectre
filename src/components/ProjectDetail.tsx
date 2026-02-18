@@ -65,6 +65,15 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose, onNext, onPrev]);
 
+    // Background Scroll Lock
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+
     // Handle horizontal scroll snap detection for index update
     const handleScroll = () => {
         if (!containerRef.current) return;
@@ -76,30 +85,25 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
 
     return (
         <motion.div
-            className="fixed inset-0 z-[10001] bg-background text-foreground flex flex-col"
+            className="fixed inset-0 z-[11000] bg-background text-foreground flex flex-col"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
         >
             {/* Header / Controls */}
-            <div className="absolute top-0 left-0 right-0 h-16 px-6 md:px-12 flex items-center justify-between z-50 pointer-events-none">
+            <div className={`absolute top-0 left-0 right-0 h-16 px-6 md:px-12 flex items-center justify-between z-[11001] pointer-events-none ${isMobile ? '' : 'pointer-events-auto'}`}>
                 {/* Project name */}
-                <span className="text-xs tracking-[0.2em] font-light text-foreground truncate max-w-[60%]">
+                <span className="text-[10px] md:text-xs tracking-[0.2em] font-light text-foreground truncate max-w-[70%]">
                     {project.name}
                 </span>
 
-                {/* Navigation Arrows (Desktop) - Center or specific placement? */}
-                {/* Keeping strict to reference: Navigation is often implicitly scroll or edge clicks. 
-            We'll add explicit buttons for clarity if needed, but reference has 'Next Project' at end of scroll.
-            Let's stick to clean overlay first.
-        */}
-
                 <button
                     onClick={onClose}
-                    className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                    className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors ml-auto"
+                    aria-label="Close preview"
                 >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
             </div>
 
@@ -116,7 +120,7 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
                 {project.media.map((media, index) => (
                     <div
                         key={media.pathname}
-                        className="w-full h-full flex-shrink-0 snap-center flex items-center justify-center p-4 md:p-12"
+                        className="w-full h-full flex-shrink-0 snap-center flex items-center justify-center px-4 py-20 md:p-12"
                     >
                         <div className="relative w-full h-full flex items-center justify-center">
                             {media.type === 'video' ? (
@@ -144,15 +148,19 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
 
             {/* Footer Info */}
             <div className="absolute bottom-6 md:bottom-8 left-0 right-0 px-6 md:px-12 flex justify-between items-end pointer-events-none text-xs md:text-sm tracking-[0.2em] font-mono">
-                <div className="text-muted-foreground">
-                    {project.category}
-                </div>
+                {!isMobile && (
+                    <div className="text-muted-foreground">
+                        {project.category}
+                    </div>
+                )}
 
-                <div className="absolute left-1/2 -translate-x-1/2 text-center">
-                    <span className="text-foreground">{project.name}</span>
-                </div>
+                {!isMobile && (
+                    <div className="absolute left-1/2 -translate-x-1/2 text-center">
+                        <span className="text-foreground">{project.name}</span>
+                    </div>
+                )}
 
-                <div className="text-muted-foreground">
+                <div className={`${isMobile ? 'w-full text-center' : 'text-muted-foreground'}`}>
                     {currentIndex + 1} / {project.media.length}
                 </div>
             </div>

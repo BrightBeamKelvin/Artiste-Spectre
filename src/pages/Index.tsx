@@ -6,13 +6,14 @@ import { FooterSection } from '@/components/FooterSection';
 
 const Index = () => {
   return (
-    <>
+    <div className="bg-background text-foreground">
       <HeroSection />
       <ManifestoSection />
       <BeliefsSection />
       <PillarsSection />
       <FooterSection />
-    </>
+    </div>
   );
 };
+
 export default Index;

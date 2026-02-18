@@ -98,7 +98,6 @@ class AsciiFilter {
     if (this.context) {
       this.context.imageSmoothingEnabled = false;
     }
-
   }
 
   setSize(width: number, height: number) {
@@ -109,6 +108,11 @@ class AsciiFilter {
 
     this.center = { x: width / 2, y: height / 2 };
     this.mouse = { x: this.center.x, y: this.center.y };
+  }
+
+  updateFontSize(size: number) {
+    this.fontSize = size;
+    this.reset();
   }
 
   reset() {
@@ -300,7 +304,6 @@ class CanvAscii {
   }
 
   async init() {
-    // Fonts are preloaded in index.html, non-blocking init here
     this.setMesh();
     this.setRenderer();
   }
@@ -361,32 +364,23 @@ class CanvAscii {
     const aspect = w / h;
     this.camera.aspect = aspect;
 
-    // Auto-adjust camera distance to fit plane width
     const textAspect = this.textCanvas.width / this.textCanvas.height;
     const planeW = this.planeBaseHeight * textAspect;
 
-    // Calculate required distance to fit planeW in horizontal FOV
-    // Horizontal FOV = 2 * atan(tan(verticalFOV/2) * aspect)
     const fovRad = (this.camera.fov * Math.PI) / 180;
     const hFovRad = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
     const distForW = (planeW / 2) / Math.tan(hFovRad / 2);
     const distForH = (this.planeBaseHeight / 2) / Math.tan(fovRad / 2);
 
-    // Set camera Z to fit both width and height with some padding
     this.camera.position.z = Math.max(distForW, distForH) * 1.1;
-
     this.camera.updateProjectionMatrix();
 
     this.filter.setSize(w, h);
-
     this.center = { x: w / 2, y: h / 2 };
   }
 
   load() {
     this.animate();
-  }
-
-  onMouseMove(evt: MouseEvent | TouchEvent) {
   }
 
   animate() {
@@ -399,12 +393,9 @@ class CanvAscii {
 
   render() {
     const time = new Date().getTime() * 0.001;
-
     this.textCanvas.render();
     this.texture.needsUpdate = true;
-
     (this.mesh.material as THREE.ShaderMaterial).uniforms.uTime.value = Math.sin(time);
-
     this.updateRotation();
     this.filter.render(this.scene, this.camera);
   }
@@ -412,9 +403,15 @@ class CanvAscii {
   updateRotation() {
     const x = 0;
     const y = 0;
-
     this.mesh.rotation.x += (x - this.mesh.rotation.x) * 0.05;
     this.mesh.rotation.y += (y - this.mesh.rotation.y) * 0.05;
+  }
+
+  updateFontSize(size: number) {
+    this.asciiFontSize = size;
+    if (this.filter) {
+      this.filter.updateFontSize(size);
+    }
   }
 
   clear() {
@@ -443,8 +440,6 @@ class CanvAscii {
         this.container.removeChild(this.filter.domElement);
       }
     }
-    this.container.removeEventListener('mousemove', this.onMouseMove);
-    this.container.removeEventListener('touchmove', this.onMouseMove);
     this.clear();
     if (this.renderer) {
       this.renderer.dispose();
@@ -539,10 +534,16 @@ export default function ASCIIText({
       if (ro) ro.disconnect();
       if (asciiRef.current) {
         asciiRef.current.dispose();
-        asciiRef.current = null;
       }
+      asciiRef.current = null;
     };
-  }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves]);
+  }, [text, textFontSize, textColor, planeBaseHeight, enableWaves]);
+
+  useEffect(() => {
+    if (asciiRef.current) {
+      asciiRef.current.updateFontSize(asciiFontSize);
+    }
+  }, [asciiFontSize]);
 
   return (
     <div
@@ -580,8 +581,6 @@ export default function ASCIIText({
           line-height: 1em;
           text-align: left;
           position: absolute;
-          left: 0;
-          top: 0;
           color: hsl(0 0% 92%);
           z-index: 9;
         }

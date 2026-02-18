@@ -28,14 +28,7 @@ export const HeroSection = () => {
   return (
     <section className="min-h-screen flex flex-col justify-center relative px-6 md:px-12 pb-32 pt-32 overflow-hidden">
       <div className="max-w-7xl w-full mx-auto relative">
-        <div className="mb-12">
-          {/* Top Line - mobile high contrast with scroll hand-off */}
-          <motion.div
-            className="md:hidden"
-          >
-            <div className="w-20 h-px bg-white" />
-          </motion.div>
-          <DrawingLine className="hidden md:block w-64" delay={0.5} />
+        <div className="mb-8 md:mb-12">
         </div>
 
         {/* Main title - editorial asymmetric layout */}

@@ -14,7 +14,7 @@ const Work = () => {
   const [activePreview, setActivePreview] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<WorkProject | null>(null);
   const isMobile = useIsMobile();
-  const [mobileView, setMobileView] = useState<'index' | 'grid'>('index');
+  const [mobileView, setMobileView] = useState<'index' | 'grid'>('grid');
   const [desktopView, setDesktopView] = useState<'index' | 'grid'>('index');
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const anchorY = useRef<number | null>(null);
@@ -53,14 +53,15 @@ const Work = () => {
     if (!isMobile || projects.length === 0) return;
 
     const handleScroll = () => {
-      const centerY = window.innerHeight / 2;
+      // With preview at the top, we want to detect items in the lower portion
+      const detectionY = window.innerHeight * 0.75;
       let closestName: string | null = null;
       let closestDist = Infinity;
 
       itemRefs.current.forEach((el, name) => {
         const rect = el.getBoundingClientRect();
         const itemCenter = rect.top + rect.height / 2;
-        const dist = Math.abs(itemCenter - centerY);
+        const dist = Math.abs(itemCenter - detectionY);
         if (dist < closestDist) {
           closestDist = dist;
           closestName = name;
@@ -112,6 +113,25 @@ const Work = () => {
     setSelectedProject(projects[prevIndex]);
   };
 
+  // Preload logic: identify neighbors of the currently active/hovered preview
+  const neighbors = useMemo(() => {
+    const currentName = isMobile ? activePreview : hoveredProject;
+    if (!currentName || projects.length === 0) return [];
+
+    const currentIndex = projects.findIndex(p => p.name === currentName);
+    if (currentIndex === -1) return [];
+
+    const indices = [
+      (currentIndex - 1 + projects.length) % projects.length,
+      (currentIndex + 1) % projects.length
+    ];
+
+    return indices
+      .map(i => projects[i])
+      .filter(p => p.media[0]?.type === 'video');
+  }, [isMobile, activePreview, hoveredProject, projects]);
+
+
   return (
     <main className="bg-background text-foreground min-h-screen pt-16 pb-16">
       {/* Loading */}
@@ -140,7 +160,7 @@ const Work = () => {
       {!isMobile && (
         <>
           {/* Desktop toggle */}
-          <div className="px-6 md:px-12 pt-8 flex justify-end">
+          <div className="px-6 md:px-12 pt-8 flex justify-start">
             <button
               onClick={() => { setDesktopView(desktopView === 'index' ? 'grid' : 'index'); window.scrollTo(0, 0); }}
               className="text-xs uppercase tracking-[0.2em] text-muted-foreground/50 hover:text-foreground transition-colors duration-300 pb-1 border-b border-transparent hover:border-foreground"
@@ -215,12 +235,12 @@ const Work = () => {
                   <div className="w-full h-full flex items-center justify-center overflow-hidden">
                     {currentPreview.type === 'video' ? (
                       <video
-                        key={currentPreview.pathname}
                         src={currentPreview.url}
                         muted
                         loop
                         autoPlay
                         playsInline
+                        preload="auto"
                         className="max-h-[90%] max-w-full object-contain"
                       />
                     ) : (
@@ -299,24 +319,18 @@ const Work = () => {
       {/* MOBILE LAYOUT */}
       {isMobile && (
         <>
-          {/* Fixed toggle bar — below nav header */}
-          <div className="fixed top-16 left-0 right-0 z-20 px-6 py-3 flex gap-6 bg-background/80 backdrop-blur-sm">
-            <button
-              onClick={() => { setMobileView(mobileView === 'index' ? 'grid' : 'index'); window.scrollTo(0, 0); }}
-              className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {mobileView === 'index' ? 'Grid' : 'Index'}
-            </button>
-          </div>
 
           {/* INDEX VIEW: fixed preview + scrollable list */}
           {mobileView === 'index' && (
             <>
-              {/* Fixed bottom preview area — in front of text and noise */}
-              <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center pointer-events-none" style={{ height: '45vh' }}>
+              {/* Fixed top preview area — below toggle bar */}
+              <div
+                className="fixed top-[calc(4rem+44px)] left-0 right-0 z-20 flex items-center justify-center pointer-events-none"
+                style={{ height: '48vh' }}
+              >
                 {currentPreview && (
                   <div
-                    className="w-[80%] max-h-full overflow-hidden flex items-center justify-center pointer-events-auto"
+                    className="w-full px-4 max-h-full overflow-hidden flex items-center justify-center pointer-events-auto"
                     onClick={() => {
                       const proj = projects.find(p => p.name === activePreview);
                       if (proj) handleProjectClick(proj);
@@ -324,20 +338,20 @@ const Work = () => {
                   >
                     {currentPreview.type === 'video' ? (
                       <video
-                        key={currentPreview.pathname}
                         src={currentPreview.url}
                         muted
                         loop
                         autoPlay
                         playsInline
-                        className="max-w-full max-h-[40vh] object-contain"
+                        preload="auto"
+                        className="max-w-full max-h-[48vh] object-contain"
                       />
                     ) : (
                       <img
                         key={currentPreview.pathname}
                         src={currentPreview.url}
                         alt=""
-                        className="max-w-full max-h-[40vh] object-contain"
+                        className="max-w-full max-h-[48vh] object-contain"
                       />
                     )}
                   </div>
@@ -346,7 +360,8 @@ const Work = () => {
 
               {/* Scrollable list */}
               <div className="relative z-10 px-6">
-                <div style={{ height: '50vh' }} />
+                {/* Top spacer to push content below the fixed preview */}
+                <div style={{ height: '62vh' }} />
 
                 {projects.map((project) => {
                   const isActive = activePreview === project.name;
@@ -396,7 +411,8 @@ const Work = () => {
                   );
                 })}
 
-                <div style={{ height: '50vh' }} />
+                {/* Bottom spacer for scrollability */}
+                <div style={{ height: '40vh' }} />
               </div>
             </>
           )}
@@ -469,6 +485,18 @@ const Work = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Neighbor Preloader: invisible videos to force browser buffering */}
+      <div className="hidden pointer-events-none" aria-hidden="true">
+        {neighbors.map((project) => (
+          <video
+            key={`preload-${project.name}`}
+            src={project.media[0].url}
+            preload="auto"
+            muted
+          />
+        ))}
+      </div>
     </main>
   );
 };
