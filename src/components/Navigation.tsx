@@ -33,7 +33,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
   return (
     <>
       <header
-        className="fixed top-0 left-0 right-0 z-50 h-16 transition-colors duration-500 bg-background"
+        className="fixed top-0 left-0 right-0 z-[10002] h-16 transition-colors duration-500 bg-background"
       >
         <div className="w-full h-full px-6 md:px-12 flex items-center justify-between relative">
           {/* Brand */}
