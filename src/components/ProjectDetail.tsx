@@ -24,16 +24,10 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         setCurrentIndex(0);
     }, [project.name]);
 
-    // Handle navigation: Internal scroll first, then project switch
+    // Handle navigation: Internal index switch first, then project switch
     const handleNext = () => {
-        if (!containerRef.current) return;
-        const width = containerRef.current.clientWidth;
-        const maxScroll = containerRef.current.scrollWidth - width;
-        const currentScroll = containerRef.current.scrollLeft;
-
-        // If not at the end, scroll to next item
-        if (currentScroll < maxScroll - 10) { // -10 for rounding buffer
-            containerRef.current.scrollBy({ left: width, behavior: 'smooth' });
+        if (currentIndex < project.media.length - 1) {
+            setCurrentIndex(prev => prev + 1);
         } else {
             // At end, go to next project
             onNext();
@@ -41,13 +35,8 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
     };
 
     const handlePrev = () => {
-        if (!containerRef.current) return;
-        const width = containerRef.current.clientWidth;
-        const currentScroll = containerRef.current.scrollLeft;
-
-        // If not at the start, scroll to prev item
-        if (currentScroll > 10) { // 10 for rounding buffer
-            containerRef.current.scrollBy({ left: -width, behavior: 'smooth' });
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
         } else {
             // At start, go to prev project
             onPrev();
@@ -63,7 +52,7 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, onNext, onPrev]);
+    }, [currentIndex, project.media.length, onClose, onNext, onPrev]);
 
     // Background Scroll Lock
     useEffect(() => {
@@ -74,18 +63,9 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
         };
     }, []);
 
-    // Handle horizontal scroll snap detection for index update
-    const handleScroll = () => {
-        if (!containerRef.current) return;
-        const scrollLeft = containerRef.current.scrollLeft;
-        const width = containerRef.current.clientWidth;
-        const index = Math.round(scrollLeft / width);
-        setCurrentIndex(index);
-    };
-
     return (
         <motion.div
-            className="fixed inset-0 z-[11000] bg-background text-foreground flex flex-col"
+            className="fixed inset-0 z-[11000] bg-background text-foreground flex flex-col overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -107,43 +87,53 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
                 </button>
             </div>
 
-            {/* Main Content - Horizontal Scroll Snap Carousel */}
-            <div
-                ref={containerRef}
-                className="flex-1 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide items-center"
-                onScroll={handleScroll}
-            >
-                {/* Horizontal spacer for centering first item if needed? 
-            No, reference has full width items or centered items.
-        */}
-
-                {project.media.map((media, index) => (
-                    <div
-                        key={media.pathname}
-                        className="w-full h-full flex-shrink-0 snap-center flex items-center justify-center px-4 py-20 md:p-12"
-                    >
-                        <div className="relative w-full h-full flex items-center justify-center">
-                            {media.type === 'video' ? (
-                                <video
-                                    src={media.url}
-                                    muted
-                                    loop
-                                    autoPlay
-                                    playsInline
-                                    className="max-w-full max-h-full object-contain shadow-2xl"
-                                />
-                            ) : (
-                                <img
-                                    src={media.url}
-                                    alt={`${project.name} - ${index + 1}`}
-                                    className="max-w-full max-h-full object-contain shadow-2xl"
-                                />
-                            )}
+            {/* Main Content - Framer Motion Transform Carousel */}
+            <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+                <motion.div
+                    className="flex h-full w-full"
+                    initial={false}
+                    animate={{ x: `-${currentIndex * 100}%` }}
+                    transition={{
+                        type: "spring",
+                        damping: 30,
+                        stiffness: 200,
+                        mass: 1
+                    }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(_, info) => {
+                        const threshold = 50;
+                        if (info.offset.x < -threshold) handleNext();
+                        else if (info.offset.x > threshold) handlePrev();
+                    }}
+                >
+                    {project.media.map((media, index) => (
+                        <div
+                            key={media.pathname}
+                            className="w-full h-full flex-shrink-0 flex items-center justify-center px-4 py-20 md:px-12 md:py-24"
+                        >
+                            <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
+                                {media.type === 'video' ? (
+                                    <video
+                                        src={media.url}
+                                        muted
+                                        loop
+                                        autoPlay={index === currentIndex}
+                                        playsInline
+                                        className="max-w-full max-h-full object-contain shadow-2xl"
+                                    />
+                                ) : (
+                                    <img
+                                        src={media.url}
+                                        alt={`${project.name} - ${index + 1}`}
+                                        className="max-w-full max-h-full object-contain shadow-2xl"
+                                    />
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
-
-                {/* "Next Project" Slide/Actions could go here */}
+                    ))}
+                </motion.div>
             </div>
 
             {/* Footer Info */}
