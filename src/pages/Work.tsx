@@ -14,13 +14,11 @@ const Work = () => {
   const [activePreview, setActivePreview] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<WorkProject | null>(null);
   const isMobile = useIsMobile();
+  const [mobileView, setMobileView] = useState<'index' | 'grid'>('index');
+  const [desktopView, setDesktopView] = useState<'index' | 'grid'>('index');
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const anchorY = useRef<number | null>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
-  const mobileContainerRef = useRef<HTMLDivElement>(null);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
-  const touchStartYRef = useRef(0);
-  const touchDeltaRef = useRef(0);
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -37,8 +35,8 @@ const Work = () => {
   // Set initial active preview
   useEffect(() => {
     if (projects.length === 0) return;
+    if (!activePreview) setActivePreview(projects[0].name);
     if (!isMobile) {
-      // Desktop: capture anchor Y for scroll-based detection
       requestAnimationFrame(() => {
         if (anchorY.current === null) {
           const firstEl = itemRefs.current.get(projects[0].name);
@@ -46,105 +44,38 @@ const Work = () => {
             anchorY.current = firstEl.getBoundingClientRect().top;
           }
         }
-        if (!activePreview) setActivePreview(projects[0].name);
       });
-    } else {
-      // Mobile: set preview from active index
-      setMobileActiveIndex(0);
-      setActivePreview(projects[0].name);
     }
   }, [data, filter, isMobile]);
 
-  // Mobile: intercept touch/wheel events for virtual index-based scrolling
+  // Mobile: detect which item is closest to viewport center on scroll
   useEffect(() => {
     if (!isMobile || projects.length === 0) return;
-    const container = mobileContainerRef.current;
-    if (!container) return;
 
-    const SWIPE_THRESHOLD = 35; // pixels of touch movement to advance one item
+    const handleScroll = () => {
+      const centerY = window.innerHeight / 2;
+      let closestName: string | null = null;
+      let closestDist = Infinity;
 
-    const advanceIndex = (direction: number) => {
-      setMobileActiveIndex(prev => {
-        const next = Math.max(0, Math.min(projects.length - 1, prev + direction));
-        return next;
+      itemRefs.current.forEach((el, name) => {
+        const rect = el.getBoundingClientRect();
+        const itemCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(itemCenter - centerY);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestName = name;
+        }
       });
-    };
 
-    // Touch handling
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartYRef.current = e.touches[0].clientY;
-      touchDeltaRef.current = 0;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      const currentY = e.touches[0].clientY;
-      const delta = touchStartYRef.current - currentY;
-      touchStartYRef.current = currentY;
-      touchDeltaRef.current += delta;
-
-      while (Math.abs(touchDeltaRef.current) >= SWIPE_THRESHOLD) {
-        const dir = Math.sign(touchDeltaRef.current);
-        touchDeltaRef.current -= dir * SWIPE_THRESHOLD;
-        advanceIndex(dir);
+      if (closestName) {
+        setActivePreview(closestName);
       }
     };
 
-    // Wheel handling (for desktop mobile-emulation / trackpad)
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      touchDeltaRef.current += e.deltaY;
-
-      while (Math.abs(touchDeltaRef.current) >= SWIPE_THRESHOLD) {
-        const dir = Math.sign(touchDeltaRef.current);
-        touchDeltaRef.current -= dir * SWIPE_THRESHOLD;
-        advanceIndex(dir);
-      }
-    };
-
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('wheel', handleWheel, { passive: false });
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, [isMobile, projects.length]);
-
-  // Mobile: sync active index → preview + programmatic scroll position
-  useEffect(() => {
-    if (!isMobile || projects.length === 0) return;
-    const listEl = listContainerRef.current;
-    if (!listEl) return;
-
-    // Update the preview
-    setActivePreview(projects[mobileActiveIndex]?.name ?? null);
-
-    // Calculate scroll position for three-phase behavior
-    const items = listEl.querySelectorAll('[data-project]') as NodeListOf<HTMLElement>;
-    if (items.length === 0) return;
-
-    const itemHeight = items[0].offsetHeight;
-    const containerHeight = listEl.clientHeight;
-    const visibleCount = Math.floor(containerHeight / itemHeight);
-    const midpoint = Math.floor(visibleCount / 2);
-    const maxScroll = listEl.scrollHeight - containerHeight;
-
-    // Phase 1: index < midpoint → scrollTop = 0 (highlight moves, list stays)
-    // Phase 2: midpoint <= index <= (total - visible + midpoint) → scroll to center
-    // Phase 3: index near end → scrollTop = max (highlight moves, list stays)
-    let targetScroll: number;
-    if (mobileActiveIndex <= midpoint) {
-      targetScroll = 0;
-    } else {
-      targetScroll = (mobileActiveIndex - midpoint) * itemHeight;
-    }
-    targetScroll = Math.max(0, Math.min(maxScroll, targetScroll));
-
-    listEl.scrollTop = targetScroll;
-  }, [mobileActiveIndex, isMobile, projects]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // run once on mount
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile, projects]);
 
   const setItemRef = useCallback((name: string) => (el: HTMLDivElement | null) => {
     if (el) {
@@ -205,181 +136,311 @@ const Work = () => {
         </div>
       )}
 
-      {/* DESKTOP LAYOUT: names left, preview right */}
+      {/* DESKTOP LAYOUT */}
       {!isMobile && (
-        <div className="px-6 md:px-12 flex gap-12">
-          {/* Left: Header + project list */}
-          <div className="w-1/2 pt-8">
-            <div className="mb-12 md:mb-20">
-              <div className="bg-border h-px w-32 mb-6" />
-              <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-8">
-                Work
-              </h1>
+        <>
+          {/* Desktop toggle */}
+          <div className="px-6 md:px-12 pt-8 flex justify-end">
+            <button
+              onClick={() => { setDesktopView(desktopView === 'index' ? 'grid' : 'index'); window.scrollTo(0, 0); }}
+              className="text-xs uppercase tracking-[0.2em] text-muted-foreground/50 hover:text-foreground transition-colors duration-300 pb-1 border-b border-transparent hover:border-foreground"
+            >
+              {desktopView === 'index' ? 'Grid' : 'Index'}
+            </button>
+          </div>
 
-              {/* Filter tabs */}
-              <div className="flex gap-6">
-                {filters.map((f) => (
-                  <button
-                    key={f.key}
-                    onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); }}
-                    className={`text-[10px] md:text-xs uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${filter === f.key
-                      ? 'text-foreground border-foreground'
-                      : 'text-muted-foreground/50 border-transparent hover:text-muted-foreground'
-                      }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {/* DESKTOP INDEX VIEW: names left, preview right */}
+          {desktopView === 'index' && (
+            <div className="px-6 md:px-12 flex gap-12 mt-12">
+              <div className="w-1/2">
+                <div>
+                  <div key={filter}>
+                    {projects.map((project, index) => {
+                      const isActive = hoveredProject === project.name;
+                      return (
+                        <div
+                          key={project.name}
+                          className="relative"
+                        >
+                          <button
+                            className="w-full py-1 md:py-1.5 text-left group flex items-center gap-0"
+                            onMouseEnter={() => setHoveredProject(project.name)}
+                            onMouseLeave={() => setHoveredProject(null)}
+                            onClick={() => handleProjectClick(project)}
+                          >
+                            {/* Animated bracket left */}
+                            <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden">
+                              <motion.span
+                                className="inline-block"
+                                initial={false}
+                                animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -8 }}
+                                transition={{ duration: 0.25, ease: 'easeOut' }}
+                              >
+                                [
+                              </motion.span>
+                            </span>
 
-            <div>
-              <div key={filter}>
-                {projects.map((project, index) => (
-                  <div
-                    key={project.name}
-                    className=""
-                  >
-                    <button
-                      className="w-full py-1 md:py-1.5 text-left group"
-                      onMouseEnter={() => setHoveredProject(project.name)}
-                      onMouseLeave={() => setHoveredProject(null)}
-                      onClick={() => handleProjectClick(project)}
-                    >
-                      <span
-                        className={`text-sm md:text-lg tracking-[0.1em] font-light ${hoveredProject === project.name
-                          ? 'text-foreground'
-                          : 'text-muted-foreground/70 group-hover:text-foreground'
-                          }`}
-                      >
-                        {project.name}
-                      </span>
-                    </button>
+                            <span
+                              className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-200 ${isActive
+                                ? 'text-foreground'
+                                : 'text-muted-foreground/70 group-hover:text-foreground'
+                                }`}
+                            >
+                              {project.name}
+                            </span>
+
+                            {/* Animated bracket right */}
+                            <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden ml-1">
+                              <motion.span
+                                className="inline-block"
+                                initial={false}
+                                animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 8 }}
+                                transition={{ duration: 0.25, ease: 'easeOut' }}
+                              >
+                                ]
+                              </motion.span>
+                            </span>
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right: spacer for layout */}
-          <div className="w-1/2" />
-
-          {/* Right: fixed preview */}
-          <div className="fixed top-16 right-0 h-[calc(100vh-4rem)] w-1/2 pr-12 pl-6 flex items-center justify-center z-[10000] pointer-events-none">
-            {currentPreview && (
-              <div
-                className="w-full h-full flex items-center justify-center overflow-hidden"
-              >
-                {currentPreview.type === 'video' ? (
-                  <video
-                    key={currentPreview.pathname}
-                    src={currentPreview.url}
-                    muted
-                    loop
-                    autoPlay
-                    playsInline
-                    className="max-h-[90%] max-w-full object-contain"
-                  />
-                ) : (
-                  <img
-                    key={currentPreview.pathname}
-                    src={currentPreview.url}
-                    alt=""
-                    className="max-h-[90%] max-w-full object-contain"
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* MOBILE LAYOUT: fixed viewport split — list scrolls internally */}
-      {isMobile && (
-        <div ref={mobileContainerRef} className="fixed inset-0 top-16 flex flex-col touch-none">
-          {/* Header area */}
-          <div className="px-6 pt-8 pb-4 flex-shrink-0">
-            <div className="bg-border h-px w-32 mb-6" />
-            <h1 className="text-3xl font-light tracking-tight mb-8">
-              Work
-            </h1>
-
-            {/* Filter tabs */}
-            <div className="flex gap-6">
-              {filters.map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => { setFilter(f.key); setHoveredProject(null); setActivePreview(null); setMobileActiveIndex(0); }}
-                  className={`text-[10px] uppercase tracking-[0.2em] pb-1 border-b transition-all duration-300 ${filter === f.key
-                    ? 'text-foreground border-foreground'
-                    : 'text-muted-foreground/50 border-transparent hover:text-muted-foreground'
-                    }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Project list — overflow hidden, scroll controlled programmatically */}
-          <div
-            ref={listContainerRef}
-            className="flex-1 overflow-hidden px-6 min-h-0"
-          >
-            {projects.map((project) => (
-              <div
-                key={project.name}
-                ref={setItemRef(project.name)}
-                data-project={project.name}
-                className="min-h-0 flex items-center"
-              >
-                <div
-                  className="py-1 text-left w-full"
-                  onClick={() => handleProjectClick(project)}
-                >
-                  <span className={`text-sm tracking-[0.1em] font-light ${activePreview === project.name
-                    ? 'text-foreground'
-                    : 'text-muted-foreground/70'
-                    }`}>
-                    {project.name}
-                  </span>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Bottom preview */}
-          <div className="flex-shrink-0 h-[40vh] flex items-center justify-center pointer-events-none">
-            {currentPreview && (
-              <div
-                className="w-[60%] max-h-[36vh] overflow-hidden"
-                onClick={() => {
-                  const proj = projects.find(p => p.name === activePreview);
-                  if (proj) handleProjectClick(proj);
-                }}
-              >
-                {currentPreview.type === 'video' ? (
-                  <video
-                    key={currentPreview.pathname}
-                    src={currentPreview.url}
-                    muted
-                    loop
-                    autoPlay
-                    playsInline
-                    className="w-full h-full object-contain pointer-events-auto"
-                  />
-                ) : (
-                  <img
-                    key={currentPreview.pathname}
-                    src={currentPreview.url}
-                    alt=""
-                    className="w-full h-full object-contain pointer-events-auto"
-                  />
+              <div className="w-1/2" />
+
+              <div className="fixed top-16 right-0 h-[calc(100vh-4rem)] w-1/2 pr-12 pl-6 flex items-center justify-center z-[10000] pointer-events-none">
+                {currentPreview && (
+                  <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                    {currentPreview.type === 'video' ? (
+                      <video
+                        key={currentPreview.pathname}
+                        src={currentPreview.url}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        className="max-h-[90%] max-w-full object-contain"
+                      />
+                    ) : (
+                      <img
+                        key={currentPreview.pathname}
+                        src={currentPreview.url}
+                        alt=""
+                        className="max-h-[90%] max-w-full object-contain"
+                      />
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* DESKTOP GRID VIEW: artsy masonry layout */}
+          {desktopView === 'grid' && (
+            <div className="px-6 md:px-12 mt-12 pb-24">
+              <div className="columns-2 lg:columns-3 gap-4">
+                {projects.map((project, index) => {
+                  const firstMedia = project.media[0];
+                  if (!firstMedia) return null;
+                  // Alternate sizing for visual rhythm
+                  const isFeature = index % 5 === 0;
+                  return (
+                    <motion.div
+                      key={project.name}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.04 }}
+                      className={`mb-4 break-inside-avoid cursor-pointer group relative overflow-hidden ${isFeature ? 'lg:col-span-2' : ''
+                        }`}
+                      onClick={() => handleProjectClick(project)}
+                    >
+                      {/* Media */}
+                      <div className="relative overflow-hidden">
+                        {firstMedia.type === 'video' ? (
+                          <video
+                            src={firstMedia.url}
+                            muted
+                            loop
+                            autoPlay
+                            playsInline
+                            className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          />
+                        ) : (
+                          <img
+                            src={firstMedia.url}
+                            alt={project.name}
+                            className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        )}
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-500 flex items-end">
+                          <div className="p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                            <p className="text-white text-xs tracking-[0.15em] uppercase font-light">
+                              {project.name}
+                            </p>
+                            <p className="text-white/50 text-[10px] tracking-[0.2em] uppercase mt-1">
+                              {project.category}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* MOBILE LAYOUT */}
+      {isMobile && (
+        <>
+          {/* Fixed toggle bar — below nav header */}
+          <div className="fixed top-16 left-0 right-0 z-20 px-6 py-3 flex gap-6 bg-background/80 backdrop-blur-sm">
+            <button
+              onClick={() => { setMobileView(mobileView === 'index' ? 'grid' : 'index'); window.scrollTo(0, 0); }}
+              className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {mobileView === 'index' ? 'Grid' : 'Index'}
+            </button>
           </div>
-        </div>
+
+          {/* INDEX VIEW: fixed preview + scrollable list */}
+          {mobileView === 'index' && (
+            <>
+              {/* Fixed bottom preview area — in front of text and noise */}
+              <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center pointer-events-none" style={{ height: '45vh' }}>
+                {currentPreview && (
+                  <div
+                    className="w-[80%] max-h-full overflow-hidden flex items-center justify-center pointer-events-auto"
+                    onClick={() => {
+                      const proj = projects.find(p => p.name === activePreview);
+                      if (proj) handleProjectClick(proj);
+                    }}
+                  >
+                    {currentPreview.type === 'video' ? (
+                      <video
+                        key={currentPreview.pathname}
+                        src={currentPreview.url}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        className="max-w-full max-h-[40vh] object-contain"
+                      />
+                    ) : (
+                      <img
+                        key={currentPreview.pathname}
+                        src={currentPreview.url}
+                        alt=""
+                        className="max-w-full max-h-[40vh] object-contain"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Scrollable list */}
+              <div className="relative z-10 px-6">
+                <div style={{ height: '50vh' }} />
+
+                {projects.map((project) => {
+                  const isActive = activePreview === project.name;
+                  return (
+                    <div
+                      key={project.name}
+                      ref={setItemRef(project.name)}
+                      data-project={project.name}
+                      className="flex items-center"
+                    >
+                      <div
+                        className="py-1.5 text-left w-full flex items-center gap-0"
+                        onClick={() => handleProjectClick(project)}
+                      >
+                        {/* Animated bracket left */}
+                        <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden">
+                          <motion.span
+                            className="inline-block"
+                            initial={false}
+                            animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -6 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                          >
+                            [
+                          </motion.span>
+                        </span>
+
+                        <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-200 ${isActive
+                          ? 'text-foreground'
+                          : 'text-muted-foreground/30'
+                          }`}>
+                          {project.name}
+                        </span>
+
+                        {/* Animated bracket right */}
+                        <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden ml-0.5">
+                          <motion.span
+                            className="inline-block"
+                            initial={false}
+                            animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 6 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                          >
+                            ]
+                          </motion.span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div style={{ height: '50vh' }} />
+              </div>
+            </>
+          )}
+
+          {/* GRID VIEW: single-column image gallery */}
+          {mobileView === 'grid' && (
+            <div className="px-6 pt-24 pb-16">
+              {projects.map((project) => {
+                const firstMedia = project.media[0];
+                if (!firstMedia) return null;
+                return (
+                  <div
+                    key={project.name}
+                    className="mb-24 cursor-pointer"
+                    onClick={() => handleProjectClick(project)}
+                  >
+                    <div className="w-full overflow-hidden">
+                      {firstMedia.type === 'video' ? (
+                        <video
+                          src={firstMedia.url}
+                          muted
+                          loop
+                          autoPlay
+                          playsInline
+                          className="w-full object-contain"
+                        />
+                      ) : (
+                        <img
+                          src={firstMedia.url}
+                          alt={project.name}
+                          className="w-full object-contain"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <p className="mt-3 text-xs tracking-[0.1em] font-light text-muted-foreground/60">
+                      {project.name}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* Empty state */}
