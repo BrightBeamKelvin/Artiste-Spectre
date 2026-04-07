@@ -40,7 +40,7 @@ export default async function handler(request: Request) {
 
     const { data, error } = await resend.emails.send({
       from: 'Machina Inquiry <onboarding@resend.dev>',
-      to: ['kelvin@brightbeam.io'],
+      to: ['pablo@machina-studio.com'],
       subject: `New Project Inquiry: ${name}`,
       replyTo: email,
       html: `

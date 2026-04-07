@@ -35,15 +35,20 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
   }, []);
 
   const [windowWidth, setWindowWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1440);
+  const [windowHeight, setWindowHeight] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
   const isLocked = windowWidth >= 765 && windowWidth <= 1311;
   const isMobileLayout = isLocked || windowWidth < 1024;
+  const isShortScreen = windowHeight < 800;
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -303,9 +308,9 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
                   {/* Scroll indicator — floats above the divider on the left, only desktop */}
                   <motion.div
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: showScroll ? 1 : 0 }}
+                    animate={{ opacity: (showScroll && !isShortScreen) ? 1 : 0 }}
                     transition={{ duration: 0.8 }}
-                    className="hidden md:block absolute -left-4 top-1/2 -translate-y-1/2 z-20"
+                    className={`hidden ${!isShortScreen ? 'md:block' : ''} absolute -left-4 top-1/2 -translate-y-1/2 z-20`}
                   >
                     <div className="flex items-center gap-2">
                       <span 
@@ -352,7 +357,13 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
                     </div>
                   </motion.div>
 
-                  <motion.p animate={{ x: [0, 2, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="hidden md:block text-[10px] md:text-[11px] uppercase tracking-[0.4em] text-white/50 font-mono text-center">[ Trusted by leading global brands across fashion, lifestyle, and performance. ]</motion.p>
+                  <motion.p 
+                    animate={{ x: [0, 2, 0] }} 
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} 
+                    className={`hidden ${!isShortScreen ? 'md:block' : ''} text-[10px] md:text-[11px] uppercase tracking-[0.4em] text-white/50 font-mono text-center`}
+                  >
+                    [ Trusted by leading global brands across fashion, lifestyle, and performance. ]
+                  </motion.p>
                 </motion.div>
               </motion.div>
             </Viewfinder>
