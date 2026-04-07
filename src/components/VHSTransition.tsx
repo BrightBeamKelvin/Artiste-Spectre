@@ -72,19 +72,14 @@ export const VHSTransition = ({ isActive, onComplete, persist = false }: VHSTran
     <AnimatePresence>
       {isActive && (
         <motion.div
-          className="fixed inset-0 z-[10002] flex items-center justify-center overflow-hidden"
+          className="fixed left-0 top-0 w-[100vw] h-[100svh] z-[10002] flex items-center justify-center overflow-hidden"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Black base - start at opacity 1 to cover screen instantly */}
-          <motion.div
-            className="absolute inset-0 bg-background"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: phase === 'out' ? 0 : 1 }}
-            transition={{ duration: 0.3 }}
-          />
+          {/* No black base (user requested no black background) */}
+
 
           {/* ASCII Text in center - responsive sizing */}
           <motion.div
@@ -96,7 +91,7 @@ export const VHSTransition = ({ isActive, onComplete, persist = false }: VHSTran
           >
             {phase === 'hold' && (
               <ASCIIText
-                text="ARTISTE SPECTRE"
+                text="MACHINA"
                 enableWaves={false}
                 asciiFontSize={isMobile ? animatedFontSize : 4}
                 textFontSize={isMobile ? 20 : 20}

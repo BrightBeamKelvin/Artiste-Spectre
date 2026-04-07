@@ -13,7 +13,7 @@ export const FooterSection = () => {
           className="flex flex-col md:flex-row justify-between items-center gap-6"
         >
           <div className="flex items-center gap-6">
-            <p className="text-[11px] uppercase tracking-[0.4em] text-white/90">ARTISTE SPECTRE LLC</p>
+            <p className="text-[11px] uppercase tracking-[0.4em] text-white/90">MACHINA LLC</p>
             <p className="hidden md:block text-[10px] uppercase tracking-[0.3em] text-white/60">
               © 2025 All rights reserved.
             </p>

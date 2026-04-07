@@ -4,14 +4,19 @@ interface DrawingLineProps {
   className?: string;
   delay?: number;
   vertical?: boolean;
+  trigger?: boolean;
 }
 
-export const DrawingLine = ({ className = '', delay = 0, vertical = false }: DrawingLineProps) => {
+export const DrawingLine = ({ className = '', delay = 0, vertical = false, trigger }: DrawingLineProps) => {
+  const animateState = { scaleX: 1, scaleY: 1 };
+  const initialState = { scaleX: vertical ? 1 : 0, scaleY: vertical ? 0 : 1 };
+
   return (
     <motion.div
-      className={`bg-border ${vertical ? 'w-px' : 'h-px'} ${className}`}
-      initial={{ scaleX: vertical ? 1 : 0, scaleY: vertical ? 0 : 1 }}
-      whileInView={{ scaleX: 1, scaleY: 1 }}
+      className={`bg-white/20 ${vertical ? 'w-px' : 'h-px'} ${className}`}
+      initial={initialState}
+      animate={trigger !== undefined ? (trigger ? animateState : initialState) : undefined}
+      whileInView={trigger === undefined ? animateState : undefined}
       viewport={{ once: true }}
       transition={{ 
         duration: 1.2, 

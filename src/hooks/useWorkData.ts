@@ -9,7 +9,9 @@ export interface MediaItem {
 
 export interface WorkProject {
   name: string;
-  category: string;
+  year: string;
+  role: string;
+  services: string[];
   media: MediaItem[];
 }
 

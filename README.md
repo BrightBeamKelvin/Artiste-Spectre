@@ -1,4 +1,4 @@
-# Artiste Spectre
+# Machina
 
 Where culture is designed, not chased. Creator-led creative and production agency.
 

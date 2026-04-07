@@ -118,9 +118,9 @@ class AsciiFilter {
   reset() {
     if (this.context) {
       this.context.font = `${this.fontSize}px ${this.fontFamily}`;
-      const charWidth = this.context.measureText('A').width;
+      const charWidth = this.context.measureText('A').width || (this.fontSize * 0.6);
 
-      this.cols = Math.floor(this.width / (this.fontSize * (charWidth / this.fontSize)));
+      this.cols = Math.floor(this.width / charWidth);
       this.rows = Math.floor(this.height / this.fontSize);
 
       this.canvas.width = this.cols;
@@ -131,9 +131,11 @@ class AsciiFilter {
       this.pre.style.padding = '0';
       this.pre.style.lineHeight = '1em';
       this.pre.style.position = 'absolute';
-      this.pre.style.left = '50%';
+      this.pre.style.left = '0';
       this.pre.style.top = '50%';
-      this.pre.style.transform = 'translate(-50%, -50%)';
+      this.pre.style.width = '100%';
+      this.pre.style.textAlign = 'center';
+      this.pre.style.transform = 'translateY(-50%)';
       this.pre.style.zIndex = '9';
       this.pre.style.backgroundAttachment = 'fixed';
       this.pre.style.mixBlendMode = 'difference';
@@ -457,7 +459,7 @@ interface ASCIITextProps {
 }
 
 export default function ASCIIText({
-  text = 'ARTISTE SPECTRE',
+  text = 'MACHINA',
   asciiFontSize = 8,
   textFontSize = 200,
   textColor = '#ebebeb',
@@ -486,7 +488,16 @@ export default function ASCIIText({
     };
 
     const setup = async () => {
-      const { width, height } = containerRef.current!.getBoundingClientRect();
+      // Wait for fonts
+      if (typeof document !== 'undefined' && 'fonts' in document) {
+        await document.fonts.ready;
+      }
+      
+      // Let layout settle for one frame
+      await new Promise(res => requestAnimationFrame(res));
+
+      if (!containerRef.current) return;
+      const { width, height } = containerRef.current.getBoundingClientRect();
 
       if (width === 0 || height === 0) {
         observer = new IntersectionObserver(
@@ -557,8 +568,6 @@ export default function ASCIIText({
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap');
-
         .ascii-text-container canvas {
           position: absolute;
           left: 0;
@@ -579,8 +588,9 @@ export default function ASCIIText({
           user-select: none;
           padding: 0;
           line-height: 1em;
-          text-align: left;
+          text-align: center;
           position: absolute;
+          width: 100%;
           color: hsl(0 0% 92%);
           z-index: 9;
         }

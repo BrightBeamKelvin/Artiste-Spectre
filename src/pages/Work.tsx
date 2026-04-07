@@ -178,50 +178,69 @@ const Work = () => {
                     {projects.map((project, index) => {
                       const isActive = hoveredProject === project.name;
                       return (
-                        <div
-                          key={project.name}
-                          className="relative"
-                        >
-                          <button
-                            className="w-full py-1 md:py-1.5 text-left group flex items-center gap-0"
-                            onMouseEnter={() => setHoveredProject(project.name)}
-                            onMouseLeave={() => setHoveredProject(null)}
-                            onClick={() => handleProjectClick(project)}
+                          <div
+                            key={project.name}
+                            className="relative"
                           >
-                            {/* Animated bracket left */}
-                            <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden">
-                              <motion.span
-                                className="inline-block"
-                                initial={false}
-                                animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -8 }}
-                                transition={{ duration: 0.25, ease: 'easeOut' }}
-                              >
-                                [
-                              </motion.span>
-                            </span>
-
-                            <span
-                              className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-200 ${isActive
-                                ? 'text-foreground'
-                                : 'text-muted-foreground/70 group-hover:text-foreground'
-                                }`}
+                            <button
+                              className="w-full py-1 md:py-1.5 text-left group flex items-center gap-0 overflow-hidden whitespace-nowrap"
+                              onMouseEnter={() => setHoveredProject(project.name)}
+                              onMouseLeave={() => setHoveredProject(null)}
+                              onClick={() => handleProjectClick(project)}
                             >
-                              {project.name}
-                            </span>
+                              <div className="flex items-center gap-0">
+                                {/* Animated bracket left */}
+                                <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden">
+                                  <motion.span
+                                    className="inline-block"
+                                    initial={false}
+                                    animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -8 }}
+                                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                                  >
+                                    [
+                                  </motion.span>
+                                </span>
 
-                            {/* Animated bracket right */}
-                            <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden ml-1">
-                              <motion.span
-                                className="inline-block"
+                                <span
+                                  className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-200 ${isActive
+                                    ? 'text-foreground'
+                                    : 'text-muted-foreground/70 group-hover:text-foreground'
+                                    }`}
+                                >
+                                  {project.name}
+                                </span>
+
+                                {/* Animated bracket right */}
+                                <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden ml-0.5">
+                                  <motion.span
+                                    className="inline-block"
+                                    initial={false}
+                                    animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 8 }}
+                                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                                  >
+                                    ]
+                                  </motion.span>
+                                </span>
+                              </div>
+
+                              {/* Project Metadata - Same Line */}
+                              <motion.div 
                                 initial={false}
-                                animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 8 }}
-                                transition={{ duration: 0.25, ease: 'easeOut' }}
+                                animate={{ 
+                                  opacity: isActive ? 1 : 0, 
+                                  x: isActive ? 0 : -12,
+                                }}
+                                transition={{ 
+                                  duration: 0.45, 
+                                  ease: [0.16, 1, 0.3, 1],
+                                  delay: isActive ? 0.08 : 0 
+                                }}
+                                className="ml-4 text-[9px] uppercase tracking-[0.4em] text-muted-foreground/40 font-mono"
                               >
-                                ]
-                              </motion.span>
-                            </span>
-                          </button>
-                        </div>
+                                {project.role}
+                              </motion.div>
+                            </button>
+                          </div>
                       );
                     })}
                   </div>
@@ -295,17 +314,24 @@ const Work = () => {
                             loading="lazy"
                           />
                         )}
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-500 flex items-end">
-                          <div className="p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                            <p className="text-white text-xs tracking-[0.15em] uppercase font-light">
-                              {project.name}
-                            </p>
-                            <p className="text-white/50 text-[10px] tracking-[0.2em] uppercase mt-1">
-                              {project.category}
-                            </p>
+                        {/* Info Overlay - Permanently Visible */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent flex items-end">
+                          <div className="p-5 w-full">
+                            <div className="flex justify-between items-baseline gap-2">
+                              <p className="text-white text-[11px] tracking-[0.15em] uppercase font-light truncate">
+                                {project.name}
+                              </p>
+                            </div>
+                            {project.role && (
+                              <p className="text-white/60 text-[10px] tracking-[0.2em] uppercase mt-1 line-clamp-1">
+                                {project.role}
+                              </p>
+                            )}
                           </div>
                         </div>
+
+                        {/* Hover Darken Overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 pointer-events-none" />
                       </div>
                     </motion.div>
                   );
@@ -372,41 +398,60 @@ const Work = () => {
                       data-project={project.name}
                       className="flex items-center"
                     >
-                      <div
-                        className="py-1.5 text-left w-full flex items-center gap-0"
+                      <button
+                        className="py-1.5 text-left w-full flex items-center gap-0 overflow-hidden"
                         onClick={() => handleProjectClick(project)}
                       >
-                        {/* Animated bracket left */}
-                        <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden">
-                          <motion.span
-                            className="inline-block"
-                            initial={false}
-                            animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -6 }}
-                            transition={{ duration: 0.25, ease: 'easeOut' }}
-                          >
-                            [
-                          </motion.span>
-                        </span>
+                        <div className="flex items-center gap-0">
+                          {/* Animated bracket left */}
+                          <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden">
+                            <motion.span
+                              className="inline-block"
+                              initial={false}
+                              animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -6 }}
+                              transition={{ duration: 0.25, ease: 'easeOut' }}
+                            >
+                              [
+                            </motion.span>
+                          </span>
 
-                        <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-200 ${isActive
-                          ? 'text-foreground'
-                          : 'text-muted-foreground/30'
-                          }`}>
-                          {project.name}
-                        </span>
+                          <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-200 ${isActive
+                            ? 'text-foreground'
+                            : 'text-muted-foreground/30'
+                            }`}>
+                            {project.name}
+                          </span>
 
-                        {/* Animated bracket right */}
-                        <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden ml-0.5">
-                          <motion.span
-                            className="inline-block"
-                            initial={false}
-                            animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 6 }}
-                            transition={{ duration: 0.25, ease: 'easeOut' }}
-                          >
-                            ]
-                          </motion.span>
-                        </span>
-                      </div>
+                          {/* Animated bracket right */}
+                          <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden ml-0.5">
+                            <motion.span
+                              className="inline-block"
+                              initial={false}
+                              animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 6 }}
+                              transition={{ duration: 0.25, ease: 'easeOut' }}
+                            >
+                              ]
+                            </motion.span>
+                          </span>
+                        </div>
+
+                        {/* Mobile Metadata - Same Line */}
+                        <motion.div 
+                          initial={false}
+                          animate={{ 
+                            opacity: isActive ? 1 : 0, 
+                            x: isActive ? 0 : -8,
+                          }}
+                          transition={{ 
+                            duration: 0.4, 
+                            ease: [0.16, 1, 0.3, 1],
+                            delay: isActive ? 0.05 : 0
+                          }}
+                          className="ml-3 text-[8px] uppercase tracking-[0.25em] text-muted-foreground/40 whitespace-nowrap"
+                        >
+                          {project.role}
+                        </motion.div>
+                      </button>
                     </div>
                   );
                 })}
@@ -417,43 +462,62 @@ const Work = () => {
             </>
           )}
 
-          {/* GRID VIEW: single-column image gallery */}
+          {/* GRID VIEW: masonry layout matching desktop */}
           {mobileView === 'grid' && (
-            <div className="px-6 pt-24 pb-16">
-              {projects.map((project) => {
-                const firstMedia = project.media[0];
-                if (!firstMedia) return null;
-                return (
-                  <div
-                    key={project.name}
-                    className="mb-24 cursor-pointer"
-                    onClick={() => handleProjectClick(project)}
-                  >
-                    <div className="w-full overflow-hidden">
-                      {firstMedia.type === 'video' ? (
-                        <video
-                          src={firstMedia.url}
-                          muted
-                          loop
-                          autoPlay
-                          playsInline
-                          className="w-full object-contain"
-                        />
-                      ) : (
-                        <img
-                          src={firstMedia.url}
-                          alt={project.name}
-                          className="w-full object-contain"
-                          loading="lazy"
-                        />
-                      )}
-                    </div>
-                    <p className="mt-3 text-xs tracking-[0.1em] font-light text-muted-foreground/60">
-                      {project.name}
-                    </p>
-                  </div>
-                );
-              })}
+            <div className="px-4 pt-24 pb-16">
+              <div className="columns-2 gap-3">
+                {projects.map((project, index) => {
+                  const firstMedia = project.media[0];
+                  if (!firstMedia) return null;
+                  const isFeature = index % 5 === 0;
+                  return (
+                    <motion.div
+                      key={project.name}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.04 }}
+                      className={`mb-3 break-inside-avoid cursor-pointer group relative overflow-hidden ${isFeature ? '' : ''}`}
+                      onClick={() => handleProjectClick(project)}
+                    >
+                      {/* Media */}
+                      <div className="relative overflow-hidden">
+                        {firstMedia.type === 'video' ? (
+                          <video
+                            src={firstMedia.url}
+                            muted
+                            loop
+                            autoPlay
+                            playsInline
+                            className="w-full object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={firstMedia.url}
+                            alt={project.name}
+                            className="w-full object-cover"
+                            loading="lazy"
+                          />
+                        )}
+                        {/* Info Overlay - Permanently Visible (Mobile) */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent flex items-end">
+                          <div className="p-3 w-full">
+                            <div className="flex justify-between items-baseline gap-1">
+                              <p className="text-white text-[9px] tracking-[0.15em] uppercase font-light truncate">
+                                {project.name}
+                              </p>
+                            </div>
+                            {project.role && (
+                              <p className="text-white/60 text-[8px] tracking-[0.2em] uppercase mt-0.5 line-clamp-1">
+                                {project.role}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </>

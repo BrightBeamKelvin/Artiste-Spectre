@@ -9,6 +9,8 @@ interface TypewriterTextProps {
   onComplete?: () => void;
   highlightWords?: string[];
   highlightClassName?: string;
+  trigger?: boolean;
+  wrap?: boolean;
 }
 
 export const TypewriterText = ({
@@ -18,15 +20,22 @@ export const TypewriterText = ({
   className = '',
   onComplete,
   highlightWords = [],
-  highlightClassName = 'selection-highlight'
+  highlightClassName = 'selection-highlight',
+  trigger = true,
+  wrap = false
 }: TypewriterTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
-  const hasStarted = useRef(false);
+  const started = useRef(false);
+  const onCompleteRef = useRef(onComplete);
 
   useEffect(() => {
-    if (hasStarted.current) return;
-    hasStarted.current = true;
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    if (!trigger || started.current) return;
+    started.current = true;
 
     const timeout = setTimeout(() => {
       let currentIndex = 0;
@@ -37,7 +46,7 @@ export const TypewriterText = ({
         } else {
           clearInterval(interval);
           setIsComplete(true);
-          onComplete?.();
+          onCompleteRef.current?.();
         }
       }, speed);
 
@@ -45,14 +54,15 @@ export const TypewriterText = ({
     }, delay);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [trigger, text, speed, delay]);
 
   const cursor = !isComplete && (
-    <span style={{ display: 'inline-block', width: 0, verticalAlign: 'middle', overflow: 'visible' }}>
+    <span style={{ position: 'relative', display: 'inline-block', width: 0, height: 0 }}>
       <motion.span
         animate={{ opacity: [1, 0] }}
         transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
-        className="text-muted-foreground ml-1"
+        className="text-muted-foreground"
+        style={{ position: 'absolute', left: '0.1em', top: '0', transform: 'translateY(-88%)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none' }}
       >
         ▌
       </motion.span>
@@ -80,34 +90,40 @@ export const TypewriterText = ({
 
       const isCurrentlyTypingInThisPart = displayedText.length >= currentPos && displayedText.length < currentPos + partLength;
       const isLastPart = i === parts.length - 1;
-      const shouldShowCursorHere = isCurrentlyTypingInThisPart || (isLastPart && displayedText.length >= text.length && !isComplete);
+      const shouldShowCursorHere = trigger && (isCurrentlyTypingInThisPart || (isLastPart && displayedText.length >= text.length && !isComplete));
 
       currentPos += partLength;
 
       const isHighlighted = highlightWords.some(word => word.toLowerCase() === part.toLowerCase());
 
-      return (
-        <span key={i} className="relative inline">
-          {/* Reservation layer: maintains layout space */}
-          <span className="opacity-0 select-none" aria-hidden="true">
-            {part}
-          </span>
+      const untypedSegment = part.slice(typedInPart);
 
-          {/* Visual layer: types text and shows highlight */}
-          <span className="absolute left-0 top-0 whitespace-nowrap">
-            <span className={isHighlighted && typedInPart > 0 ? highlightClassName : ''}>
-              {typedSegment}
-            </span>
-            {shouldShowCursorHere && cursor}
+      return (
+        <span key={i} className="inline">
+          <span className={isHighlighted && typedInPart > 0 ? highlightClassName : ''}>
+            {typedSegment}
           </span>
+          {shouldShowCursorHere && cursor}
         </span>
       );
     });
   };
 
+  const alignmentClass = className.includes('text-right') ? 'text-right' : className.includes('text-center') ? 'text-center' : 'text-left';
+
   return (
-    <span className={className}>
-      {renderText()}
+    <span className={`relative block w-full ${className} ${wrap ? 'whitespace-pre-wrap' : ''} ${!wrap && !className.includes('whitespace-') ? 'whitespace-nowrap' : ''}`}>
+      <span className={`grid shrink-0 ${alignmentClass}`}>
+        {/* Ghost text to reserve space and anticipate layout */}
+        <span className="invisible pointer-events-none select-none [grid-area:1/1/2/2]" aria-hidden="true">
+          {text}
+        </span>
+        
+        {/* Actual typewriter content */}
+        <span className="[grid-area:1/1/2/2]">
+          {renderText()}
+        </span>
+      </span>
     </span>
   );
 };

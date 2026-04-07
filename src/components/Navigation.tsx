@@ -18,6 +18,8 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+
+
   // Scroll-driven effects
   const { scrollY } = useScroll();
   const headerBorderWidth = useTransform(scrollY, [0, 100], ['5rem', '100%']);
@@ -55,7 +57,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
               onClick={(e) => handleClick(e, '/')}
               className="text-xs md:text-base uppercase tracking-[0.3em] font-medium text-white md:text-foreground hover:text-muted-foreground transition-colors duration-300 block"
             >
-              ARTISTE SPECTRE
+              MACHINA
             </Link>
           </div>
 
@@ -112,7 +114,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
             <div className="absolute bottom-0 inset-x-0 h-[0.5px] bg-white/50" />
           ) : (
             <motion.div
-              className="absolute bottom-0 left-6 md:left-12 h-[0.5px] bg-white/50 origin-left"
+              className={`absolute bottom-0 left-6 md:left-12 h-[0.5px] bg-white/50 origin-left ${location.pathname === '/' ? 'hidden md:block' : ''}`}
               style={{
                 width: headerBorderWidth,
                 opacity: headerBorderOpacity,

@@ -4,7 +4,9 @@ export const STATIC_WORK_DATA: WorkData = {
     "brandWork": [
         {
             "name": "Adidas | James Harden",
-            "category": "Brand Work",
+            "year": "2025",
+            "role": "Producer, Director of Photography",
+            "services": ["In House Creative Consulting Camera", "Lighting", "Production support"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/1.mp4",
@@ -15,7 +17,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Nike | Jordan ",
-            "category": "Brand Work",
+            "year": "",
+            "role": "",
+            "services": [],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Nike%20%7C%20Jordan%20/instagram_DHl8Z0_ywn__mute.mp4",
@@ -26,7 +30,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Nike | Jumpman",
-            "category": "Brand Work",
+            "year": "",
+            "role": "Producer, Technical Director, Director of Photography",
+            "services": ["In House Creative Consulting Camera", "Lighting", "Production support"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Nike%20%7C%20Jumpman/1.mp4",
@@ -56,8 +62,10 @@ export const STATIC_WORK_DATA: WorkData = {
             ]
         },
         {
-            "name": "Onyx E-bike",
-            "category": "Brand Work",
+            "name": "Onyx E bike",
+            "year": "2025",
+            "role": "Producer, Director, Director of Photography",
+            "services": ["In House Creative Consulting Camera", "Lighting", "Production support", "Talent Acquisition"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Onyx%20E-bike/1.mp4",
@@ -75,7 +83,9 @@ export const STATIC_WORK_DATA: WorkData = {
     "albumCovers": [
         {
             "name": "Abi Polinsky",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["Stages", "Lighting", "Talent Acquisition"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Abi%20Polinsky/Abi%201.jpg",
@@ -106,7 +116,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Alison Wonderland",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["Lighting", "Logistics"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Alison%20Wonderland/alison%201.mp4",
@@ -137,7 +149,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Ariana Grande",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["In House Creative Consulting", "Lighting", "Production support", "Talent Acquisition"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Ariana%20Grande/ariana%201.jpg",
@@ -163,7 +177,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Chase Shakur",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["In House Creative Consulting", "Lighting", "Production support", "Talent Acquisition"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Chase%20Shakur/chase%201.jpg",
@@ -189,7 +205,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Kiana Lede",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["In House Creative Consulting", "Lighting", "Production"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Kiana%20Lede/kiana%201.jpg",
@@ -215,7 +233,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Kiana Lede 2",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["In House Creative Consulting", "Lighting", "Production"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Kiana%20Lede%202/kiana%201.jpg",
@@ -231,7 +251,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Renee Rapp",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Lighting Designer",
+            "services": [],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Renee%20Rapp/renee%201.jpg",
@@ -242,7 +264,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Renee Rapp 2",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Lighting Designer",
+            "services": [],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Renee%20Rapp%202/renee%201.jpg",
@@ -268,7 +292,9 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Yung Gravy",
-            "category": "Album Covers",
+            "year": "",
+            "role": "Producer, Lighting Designer",
+            "services": ["In House Creative Consulting", "Lighting", "Production"],
             "media": [
                 {
                     "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Yung%20Gravy/YG%201.jpg",
@@ -302,7 +328,7 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "src": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Logo/air-jordan%20250.svg",
-            "alt": "air-jordan 250",
+            "alt": "air jordan 250",
             "type": "image",
             "scale": 110
         },

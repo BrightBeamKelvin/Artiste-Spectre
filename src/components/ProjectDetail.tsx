@@ -94,18 +94,49 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
             transition={{ duration: 0.3 }}
         >
             {/* Header / Controls */}
-            <div className={`absolute top-0 left-0 right-0 h-16 px-6 md:px-12 flex items-center justify-between z-[11001] pointer-events-none ${isMobile ? '' : 'pointer-events-auto'}`}>
-                {/* Project name */}
-                <span className="text-[10px] md:text-xs tracking-[0.2em] font-light text-foreground truncate max-w-[70%]">
-                    {project.name}
-                </span>
+            <div className={`absolute top-0 left-0 right-0 px-6 md:px-12 pt-6 md:pt-8 flex items-start justify-between z-[11001] pointer-events-none ${isMobile ? 'bg-gradient-to-b from-black/60 to-transparent pb-12' : ''}`}>
+                {/* Project Info Block */}
+                <div className="flex flex-col gap-1.5 pointer-events-auto">
+                    <span className="text-[12px] md:text-sm tracking-[0.2em] font-medium text-white uppercase">
+                        {project.name}
+                        {!isMobile && project.year && (
+                            <span className="text-white/30 ml-2 font-mono text-[10px]">[{project.year}]</span>
+                        )}
+                    </span>
+                    
+                    {project.role && (
+                        <p className="text-[10px] tracking-[0.15em] uppercase text-white/80 font-normal leading-tight">
+                            {project.role}
+                        </p>
+                    )}
+                    
+                    {!isMobile && project.services.length > 0 && (
+                        <div className="flex flex-col gap-0.5">
+                            {project.services.map((service, idx) => (
+                                <p key={idx} className="text-[9px] tracking-[0.12em] uppercase text-white/40 font-normal leading-tight">
+                                    {service}
+                                </p>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {isMobile && project.services.length > 0 && (
+                        <div className="flex flex-col gap-0.5">
+                            {project.services.map((service, idx) => (
+                                <p key={idx} className="text-[9px] tracking-[0.12em] uppercase text-white/50 font-normal leading-tight">
+                                    {service}
+                                </p>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 <button
                     onClick={onClose}
-                    className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors ml-auto"
+                    className="pointer-events-auto w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors flex-shrink-0"
                     aria-label="Close preview"
                 >
-                    <X className="w-5 h-5 md:w-6 md:h-6" />
+                    <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </button>
             </div>
 
@@ -143,20 +174,8 @@ export const ProjectDetail = ({ project, onClose, onNext, onPrev }: ProjectDetai
             </div>
 
             {/* Footer Info */}
-            <div className="absolute bottom-6 md:bottom-8 left-0 right-0 px-6 md:px-12 flex justify-between items-end pointer-events-none text-xs md:text-sm tracking-[0.2em] font-mono">
-                {!isMobile && (
-                    <div className="text-muted-foreground">
-                        {project.category}
-                    </div>
-                )}
-
-                {!isMobile && (
-                    <div className="absolute left-1/2 -translate-x-1/2 text-center">
-                        <span className="text-foreground">{project.name}</span>
-                    </div>
-                )}
-
-                <div className={`${isMobile ? 'w-full text-center' : 'text-muted-foreground'}`}>
+            <div className="absolute bottom-6 md:bottom-8 left-0 right-0 px-6 md:px-12 flex justify-end items-end pointer-events-none text-xs md:text-sm tracking-[0.2em] font-mono">
+                <div className={`${isMobile ? 'w-full text-center' : 'text-white/30'}`}>
                     {currentIndex + 1} / {project.media.length}
                 </div>
             </div>
