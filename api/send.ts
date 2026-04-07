@@ -1,15 +1,25 @@
 import { Resend } from 'resend';
 
+export const config = {
+  runtime: 'edge',
+};
+
 export default async function handler(request: Request) {
   try {
-    if (!process.env.RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: 'RESEND_API_KEY is not configured on Vercel. Go to Settings > Environment Variables to add it.' }), {
+    const apiKey = process.env.RESEND_API_KEY;
+    
+    // Debug log for Vercel logs (safe: only shows length, not the key)
+    console.log('API Key present:', !!apiKey, 'Length:', apiKey?.length || 0);
+
+    if (!apiKey) {
+      console.error('MISSING RESEND_API_KEY: Update your environment variables in the Vercel dashboard.');
+      return new Response(JSON.stringify({ error: 'SYSTEM ERROR: Contact functionality is not configured. Please add the RESEND_API_KEY to your project settings.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = new Resend(apiKey);
 
     if (request.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
