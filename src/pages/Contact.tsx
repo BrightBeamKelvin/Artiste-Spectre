@@ -240,25 +240,14 @@ const Contact = () => {
             <div>
               <span className="text-[10px] tracking-widest text-muted-foreground/50 block mb-3 uppercase">GENERAL INQUIRIES</span>
               <a
-                href="mailto:kelvin@brightbeam.io"
+                href="mailto:pablo@machina-studio.com"
                 className="relative inline-block text-lg font-light after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-foreground hover:after:w-full after:transition-all after:duration-300"
               >
-                kelvin@brightbeam.io
+                pablo@machina-studio.com
               </a>
             </div>
           </RevealText>
 
-          <RevealText delay={0.8}>
-            <div>
-              <span className="text-[10px] tracking-widest text-muted-foreground/50 block mb-3 uppercase">PARTNERSHIPS</span>
-              <a
-                href="mailto:partners@machina.com"
-                className="relative inline-block text-lg font-light after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-foreground hover:after:w-full after:transition-all after:duration-300"
-              >
-                partners@machina.com
-              </a>
-            </div>
-          </RevealText>
         </div>
       </div>
     </main>
