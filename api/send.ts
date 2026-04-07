@@ -1,20 +1,23 @@
 import { Resend } from 'resend';
 
-export const config = {
-  runtime: 'edge',
-};
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export default async function handler(request: Request) {
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
   try {
+    if (!process.env.RESEND_API_KEY) {
+      return new Response(JSON.stringify({ error: 'RESEND_API_KEY is not configured on Vercel. Go to Settings > Environment Variables to add it.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    if (request.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await request.json();
     const { name, email, phone, reachingOutAs, projectType, message } = body;
 
@@ -66,9 +69,9 @@ export default async function handler(request: Request) {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+    return new Response(JSON.stringify({ error: `Server error: ${error.message || 'Unknown'}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
