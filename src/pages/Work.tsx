@@ -32,7 +32,7 @@ const Work = () => {
     if (filter === 'albums') return data.albumCovers;
     return [...data.brandWork, ...data.albumCovers];
   }, [data, filter]);
-  // Set initial active preview
+
   useEffect(() => {
     if (projects.length === 0) return;
     if (!activePreview) setActivePreview(projects[0].name);
@@ -46,14 +46,12 @@ const Work = () => {
         }
       });
     }
-  }, [data, filter, isMobile]);
+  }, [data, filter, isMobile, projects, activePreview]);
 
-  // Mobile: detect which item is closest to viewport center on scroll
   useEffect(() => {
     if (!isMobile || projects.length === 0) return;
 
     const handleScroll = () => {
-      // With preview at the top, we want to detect items in the lower portion
       const detectionY = window.innerHeight * 0.75;
       let closestName: string | null = null;
       let closestDist = Infinity;
@@ -74,7 +72,7 @@ const Work = () => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // run once on mount
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMobile, projects]);
 
@@ -86,7 +84,6 @@ const Work = () => {
     }
   }, []);
 
-  // Get the first media item for a given project name
   const getPreviewItem = (projectName: string | null) => {
     if (!projectName) return null;
     const project = projects.find((p) => p.name === projectName);
@@ -113,7 +110,6 @@ const Work = () => {
     setSelectedProject(projects[prevIndex]);
   };
 
-  // Preload logic: identify neighbors of the currently active/hovered preview
   const neighbors = useMemo(() => {
     const currentName = isMobile ? activePreview : hoveredProject;
     if (!currentName || projects.length === 0) return [];
@@ -131,10 +127,8 @@ const Work = () => {
       .filter(p => p.media[0]?.type === 'video');
   }, [isMobile, activePreview, hoveredProject, projects]);
 
-
   return (
     <main className="bg-background text-foreground min-h-screen pt-16 pb-16">
-      {/* Loading */}
       {isLoading && (
         <div className="px-6 md:px-12 mb-8">
           <motion.p
@@ -147,7 +141,6 @@ const Work = () => {
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div className="px-6 md:px-12 mb-8">
           <p className="text-[10px] uppercase tracking-[0.3em] text-destructive/60">
@@ -156,10 +149,8 @@ const Work = () => {
         </div>
       )}
 
-      {/* DESKTOP LAYOUT */}
       {!isMobile && (
         <>
-          {/* Desktop toggle */}
           <div className="px-6 md:px-12 pt-8 flex justify-start">
             <button
               onClick={() => { setDesktopView(desktopView === 'index' ? 'grid' : 'index'); window.scrollTo(0, 0); }}
@@ -169,81 +160,65 @@ const Work = () => {
             </button>
           </div>
 
-          {/* DESKTOP INDEX VIEW: names left, preview right */}
           {desktopView === 'index' && (
             <div className="px-6 md:px-12 flex gap-12 mt-12">
               <div className="w-1/2">
-                <div>
-                  <div key={filter}>
-                    {projects.map((project, index) => {
-                      const isActive = hoveredProject === project.name;
-                      return (
-                          <div
-                            key={project.name}
-                            className="relative"
-                          >
-                            <button
-                              className="w-full py-1 md:py-1.5 text-left group flex items-center gap-0 overflow-hidden whitespace-nowrap"
-                              onMouseEnter={() => setHoveredProject(project.name)}
-                              onMouseLeave={() => setHoveredProject(null)}
-                              onClick={() => handleProjectClick(project)}
-                            >
-                              <div className="flex items-center gap-0">
-                                {/* Animated bracket left */}
-                                <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden">
-                                  <motion.span
-                                    className="inline-block"
-                                    initial={false}
-                                    animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -8 }}
-                                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                                  >
-                                    [
-                                  </motion.span>
-                                </span>
-
-                                <span
-                                  className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-200 ${isActive
-                                    ? 'text-foreground'
-                                    : 'text-muted-foreground/70 group-hover:text-foreground'
-                                    }`}
-                                >
-                                  {project.name}
-                                </span>
-
-                                {/* Animated bracket right */}
-                                <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden ml-0.5">
-                                  <motion.span
-                                    className="inline-block"
-                                    initial={false}
-                                    animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 8 }}
-                                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                                  >
-                                    ]
-                                  </motion.span>
-                                </span>
-                              </div>
-
-                              {/* Project Metadata - Same Line */}
-                              <motion.div 
+                <div key={filter}>
+                  {projects.map((project) => {
+                    const isActive = hoveredProject === project.name;
+                    return (
+                      <div key={project.name} className="relative">
+                        <button
+                          className="w-full py-1 md:py-1.5 text-left group flex items-center gap-0 overflow-hidden whitespace-nowrap"
+                          onMouseEnter={() => setHoveredProject(project.name)}
+                          onMouseLeave={() => setHoveredProject(null)}
+                          onClick={() => handleProjectClick(project)}
+                        >
+                          <div className="flex items-center gap-0">
+                            <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden">
+                              <motion.span
+                                className="inline-block"
                                 initial={false}
-                                animate={{ 
-                                  opacity: isActive ? 1 : 0, 
-                                  x: isActive ? 0 : -12,
-                                }}
-                                transition={{ 
-                                  duration: 0.45, 
-                                  ease: [0.16, 1, 0.3, 1],
-                                  delay: isActive ? 0.08 : 0 
-                                }}
-                                className="ml-4 text-[9px] uppercase tracking-[0.4em] text-muted-foreground/40 font-mono"
+                                animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -8 }}
+                                transition={{ duration: 0.25, ease: 'easeOut' }}
                               >
-                                {project.role}
-                              </motion.div>
-                            </button>
+                                [
+                              </motion.span>
+                            </span>
+
+                            <span
+                              className={`text-sm md:text-lg tracking-[0.1em] font-light transition-colors duration-200 ${isActive
+                                ? 'text-foreground'
+                                : 'text-muted-foreground/70 group-hover:text-foreground'
+                                }`}
+                            >
+                              {project.name}
+                            </span>
+
+                            <span className="inline-block w-4 text-foreground/60 font-light text-lg overflow-hidden ml-0.5">
+                              <motion.span
+                                className="inline-block"
+                                initial={false}
+                                animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 8 }}
+                                transition={{ duration: 0.25, ease: 'easeOut' }}
+                              >
+                                ]
+                              </motion.span>
+                            </span>
                           </div>
-                      );
-                    })}
-                  </div>
+
+                          <motion.div 
+                            initial={false}
+                            animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -12 }}
+                            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: isActive ? 0.08 : 0 }}
+                            className="ml-4 text-[9px] uppercase tracking-[0.4em] text-muted-foreground/40 font-mono"
+                          >
+                            {project.role}
+                          </motion.div>
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -253,22 +228,9 @@ const Work = () => {
                 {currentPreview && (
                   <div className="w-full h-full flex items-center justify-center overflow-hidden">
                     {currentPreview.type === 'video' ? (
-                      <video
-                        src={currentPreview.url}
-                        muted
-                        loop
-                        autoPlay
-                        playsInline
-                        preload="auto"
-                        className="max-h-[90%] max-w-full object-contain"
-                      />
+                      <video src={currentPreview.url} muted loop autoPlay playsInline preload="auto" className="max-h-[90%] max-w-full object-contain" />
                     ) : (
-                      <img
-                        key={currentPreview.pathname}
-                        src={currentPreview.url}
-                        alt=""
-                        className="max-h-[90%] max-w-full object-contain"
-                      />
+                      <img key={currentPreview.pathname} src={currentPreview.url} alt="" className="max-h-[90%] max-w-full object-contain" />
                     )}
                   </div>
                 )}
@@ -276,14 +238,12 @@ const Work = () => {
             </div>
           )}
 
-          {/* DESKTOP GRID VIEW: artsy masonry layout */}
           {desktopView === 'grid' && (
             <div className="px-6 md:px-12 mt-12 pb-24">
               <div className="columns-2 lg:columns-3 gap-4">
                 {projects.map((project, index) => {
                   const firstMedia = project.media[0];
                   if (!firstMedia) return null;
-                  // Alternate sizing for visual rhythm
                   const isFeature = index % 5 === 0;
                   return (
                     <motion.div
@@ -291,30 +251,15 @@ const Work = () => {
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.04 }}
-                      className={`mb-4 break-inside-avoid cursor-pointer group relative overflow-hidden ${isFeature ? 'lg:col-span-2' : ''
-                        }`}
+                      className={`mb-4 break-inside-avoid cursor-pointer group relative overflow-hidden ${isFeature ? 'lg:col-span-2' : ''}`}
                       onClick={() => handleProjectClick(project)}
                     >
-                      {/* Media */}
                       <div className="relative overflow-hidden">
                         {firstMedia.type === 'video' ? (
-                          <video
-                            src={firstMedia.url}
-                            muted
-                            loop
-                            autoPlay
-                            playsInline
-                            className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                          />
+                          <video src={firstMedia.url} muted loop autoPlay playsInline className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                         ) : (
-                          <img
-                            src={firstMedia.url}
-                            alt={project.name}
-                            className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                            loading="lazy"
-                          />
+                          <img src={firstMedia.url} alt={project.name} className="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" loading="lazy" />
                         )}
-                        {/* Info Overlay - Permanently Visible */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent flex items-end">
                           <div className="p-5 w-full">
                             <div className="flex justify-between items-baseline gap-2">
@@ -329,8 +274,6 @@ const Work = () => {
                             )}
                           </div>
                         </div>
-
-                        {/* Hover Darken Overlay */}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 pointer-events-none" />
                       </div>
                     </motion.div>
@@ -342,18 +285,11 @@ const Work = () => {
         </>
       )}
 
-      {/* MOBILE LAYOUT */}
       {isMobile && (
         <>
-
-          {/* INDEX VIEW: fixed preview + scrollable list */}
           {mobileView === 'index' && (
             <>
-              {/* Fixed top preview area — below toggle bar */}
-              <div
-                className="fixed top-[calc(4rem+44px)] left-0 right-0 z-20 flex items-center justify-center pointer-events-none"
-                style={{ height: '48vh' }}
-              >
+              <div className="fixed top-[calc(4rem+44px)] left-0 right-0 z-20 flex items-center justify-center pointer-events-none" style={{ height: '48vh' }}>
                 {currentPreview && (
                   <div
                     className="w-full px-4 max-h-full overflow-hidden flex items-center justify-center pointer-events-auto"
@@ -363,106 +299,45 @@ const Work = () => {
                     }}
                   >
                     {currentPreview.type === 'video' ? (
-                      <video
-                        src={currentPreview.url}
-                        muted
-                        loop
-                        autoPlay
-                        playsInline
-                        preload="auto"
-                        className="max-w-full max-h-[48vh] object-contain"
-                      />
+                      <video src={currentPreview.url} muted loop autoPlay playsInline preload="auto" className="max-w-full max-h-[48vh] object-contain" />
                     ) : (
-                      <img
-                        key={currentPreview.pathname}
-                        src={currentPreview.url}
-                        alt=""
-                        className="max-w-full max-h-[48vh] object-contain"
-                      />
+                      <img key={currentPreview.pathname} src={currentPreview.url} alt="" className="max-w-full max-h-[48vh] object-contain" />
                     )}
                   </div>
                 )}
               </div>
 
-              {/* Scrollable list */}
               <div className="relative z-10 px-6">
-                {/* Top spacer to push content below the fixed preview */}
                 <div style={{ height: '62vh' }} />
-
                 {projects.map((project) => {
                   const isActive = activePreview === project.name;
                   return (
-                    <div
-                      key={project.name}
-                      ref={setItemRef(project.name)}
-                      data-project={project.name}
-                      className="flex items-center"
-                    >
-                      <button
-                        className="py-1.5 text-left w-full flex items-center gap-0 overflow-hidden"
-                        onClick={() => handleProjectClick(project)}
-                      >
+                    <div key={project.name} ref={setItemRef(project.name)} data-project={project.name} className="flex items-center">
+                      <button className="py-1.5 text-left w-full flex items-center gap-0 overflow-hidden" onClick={() => handleProjectClick(project)}>
                         <div className="flex items-center gap-0">
-                          {/* Animated bracket left */}
                           <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden">
-                            <motion.span
-                              className="inline-block"
-                              initial={false}
-                              animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -6 }}
-                              transition={{ duration: 0.25, ease: 'easeOut' }}
-                            >
+                            <motion.span className="inline-block" initial={false} animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : -6 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
                               [
                             </motion.span>
                           </span>
-
-                          <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-200 ${isActive
-                            ? 'text-foreground'
-                            : 'text-muted-foreground/30'
-                            }`}>
+                          <span className={`text-sm tracking-[0.1em] font-light transition-colors duration-200 ${isActive ? 'text-foreground' : 'text-muted-foreground/30'}`}>
                             {project.name}
                           </span>
-
-                          {/* Animated bracket right */}
                           <span className="inline-block w-3 text-foreground/60 font-light text-sm overflow-hidden ml-0.5">
-                            <motion.span
-                              className="inline-block"
-                              initial={false}
-                              animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 6 }}
-                              transition={{ duration: 0.25, ease: 'easeOut' }}
-                            >
+                            <motion.span className="inline-block" initial={false} animate={{ opacity: isActive ? 1 : 0, x: isActive ? 0 : 6 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
                               ]
                             </motion.span>
                           </span>
                         </div>
-
-                        {/* Mobile Metadata - Same Line */}
-                        <motion.div 
-                          initial={false}
-                          animate={{ 
-                            opacity: isActive ? 1 : 0, 
-                            x: isActive ? 0 : -8,
-                          }}
-                          transition={{ 
-                            duration: 0.4, 
-                            ease: [0.16, 1, 0.3, 1],
-                            delay: isActive ? 0.05 : 0
-                          }}
-                          className="ml-3 text-[8px] uppercase tracking-[0.25em] text-muted-foreground/40 whitespace-nowrap"
-                        >
-                          {project.role}
-                        </motion.div>
                       </button>
                     </div>
                   );
                 })}
-
-                {/* Bottom spacer for scrollability */}
                 <div style={{ height: '40vh' }} />
               </div>
             </>
           )}
 
-          {/* GRID VIEW: masonry layout matching desktop */}
           {mobileView === 'grid' && (
             <div className="px-4 pt-24 pb-16">
               <div className="columns-2 gap-3">
@@ -479,26 +354,12 @@ const Work = () => {
                       className={`mb-3 break-inside-avoid cursor-pointer group relative overflow-hidden ${isFeature ? '' : ''}`}
                       onClick={() => handleProjectClick(project)}
                     >
-                      {/* Media */}
                       <div className="relative overflow-hidden">
                         {firstMedia.type === 'video' ? (
-                          <video
-                            src={firstMedia.url}
-                            muted
-                            loop
-                            autoPlay
-                            playsInline
-                            className="w-full object-cover"
-                          />
+                          <video src={firstMedia.url} muted loop autoPlay playsInline className="w-full object-cover" />
                         ) : (
-                          <img
-                            src={firstMedia.url}
-                            alt={project.name}
-                            className="w-full object-cover"
-                            loading="lazy"
-                          />
+                          <img src={firstMedia.url} alt={project.name} className="w-full object-cover" loading="lazy" />
                         )}
-                        {/* Info Overlay - Permanently Visible (Mobile) */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent flex items-end">
                           <div className="p-3 w-full">
                             <div className="flex justify-between items-baseline gap-1">
@@ -506,11 +367,6 @@ const Work = () => {
                                 {project.name}
                               </p>
                             </div>
-                            {project.role && (
-                              <p className="text-white/60 text-[8px] tracking-[0.2em] uppercase mt-0.5 line-clamp-1">
-                                {project.role}
-                              </p>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -523,12 +379,9 @@ const Work = () => {
         </>
       )}
 
-      {/* Empty state */}
       {!isLoading && !error && projects.length === 0 && (
         <div className="px-6 md:px-12">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/30">
-            No work to display yet.
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/30">No work to display yet.</p>
         </div>
       )}
 
@@ -538,7 +391,6 @@ const Work = () => {
         </div>
       )}
 
-      {/* Project Detail Overlay */}
       <AnimatePresence>
         {selectedProject && (
           <ProjectDetail
@@ -550,15 +402,9 @@ const Work = () => {
         )}
       </AnimatePresence>
 
-      {/* Neighbor Preloader: invisible videos to force browser buffering */}
       <div className="hidden pointer-events-none" aria-hidden="true">
         {neighbors.map((project) => (
-          <video
-            key={`preload-${project.name}`}
-            src={project.media[0].url}
-            preload="auto"
-            muted
-          />
+          <video key={`preload-${project.name}`} src={project.media[0].url} preload="auto" muted />
         ))}
       </div>
     </main>

@@ -9,9 +9,19 @@ export const STATIC_WORK_DATA: WorkData = {
             "services": ["In House Creative Consulting Camera", "Lighting", "Production support"],
             "media": [
                 {
-                    "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/1.mp4",
+                    "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20James%201.mp4".replace(/ /g, '%20').replace(/\|/g, '%7C'),
                     "type": "video",
-                    "pathname": "Brand Work/Adidas | James Harden/1.mp4"
+                    "pathname": "Brand Work/Adidas | James Harden/Adidas James 1.mp4"
+                },
+                {
+                    "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20james%202.mp4".replace(/ /g, '%20').replace(/\|/g, '%7C'),
+                    "type": "video",
+                    "pathname": "Brand Work/Adidas | James Harden/Adidas james 2.mp4"
+                },
+                {
+                    "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20james%203.mp4".replace(/ /g, '%20').replace(/\|/g, '%7C'),
+                    "type": "video",
+                    "pathname": "Brand Work/Adidas | James Harden/Adidas james 3.mp4"
                 }
             ]
         },
@@ -149,6 +159,19 @@ export const STATIC_WORK_DATA: WorkData = {
         },
         {
             "name": "Ariana Grande",
+            "year": "2023",
+            "role": "Producer, Lighting Designer",
+            "services": ["In House Creative Consulting", "Lighting", "Production support", "Talent Acquisition"],
+            "media": [
+                {
+                    "url": "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Ariana%20Grande%202/Ariana%20Grande%2C%20Taro%20Hakase%20-%20Baby%20I%20%28Live%20from%20London%20%E2%A7%B8%202023%29%20%5BNN9aqmCprSo%5D.mp4",
+                    "type": "video",
+                    "pathname": "Album Covers/Ariana Grande 2/Ariana Grande, Taro Hakase - Baby I (Live from London ⧸ 2023) [NN9aqmCprSo].mp4"
+                }
+            ]
+        },
+        {
+            "name": "Ariana Grande",
             "year": "",
             "role": "Producer, Lighting Designer",
             "services": ["In House Creative Consulting", "Lighting", "Production support", "Talent Acquisition"],
@@ -232,7 +255,7 @@ export const STATIC_WORK_DATA: WorkData = {
             ]
         },
         {
-            "name": "Kiana Lede 2",
+            "name": "Kiana Lede",
             "year": "",
             "role": "Producer, Lighting Designer",
             "services": ["In House Creative Consulting", "Lighting", "Production"],
@@ -263,7 +286,7 @@ export const STATIC_WORK_DATA: WorkData = {
             ]
         },
         {
-            "name": "Renee Rapp 2",
+            "name": "Renee Rapp",
             "year": "",
             "role": "Lighting Designer",
             "services": [],

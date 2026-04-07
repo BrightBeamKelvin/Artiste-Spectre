@@ -41,7 +41,7 @@ export const HowWeBuildSection = () => {
 
   return (
     <motion.section
-      className="relative w-full bg-background overflow-hidden flex flex-col h-full"
+      className="relative w-full bg-background overflow-hidden flex flex-col h-full min-h-0"
     >
       {/* Mobile Neural Net Background */}
       {isMobileLayout && (
@@ -53,13 +53,13 @@ export const HowWeBuildSection = () => {
       <div className="w-full h-px bg-white/10" />
 
       {/* Main Container - Pushed towards bottom to reduce the gap to footer */}
-      <div className="flex-1 w-full flex flex-col pb-8 lg:pb-16 pt-24 md:pt-12 relative z-[60]">
-        <div className="w-full max-w-[90rem] mx-auto px-6 md:px-12 mt-auto">
+      <div className="flex-1 w-full flex flex-col justify-center pb-4 lg:pb-8 pt-8 md:pt-10 relative z-[60] min-h-0 overflow-hidden">
+        <div className="w-full max-w-[90rem] mx-auto px-6 md:px-12">
           {/* Header row */}
         <HeaderRow />
 
         {/* Pillars list */}
-        <div className="mt-8 md:mt-10 space-y-0">
+        <div className="mt-5 md:mt-8 space-y-0">
           {pillars.map((p, i) => (
             <PillarRow key={p.num} pillar={p} index={i} />
           ))}
@@ -80,7 +80,7 @@ function HeaderRow() {
   const [showPart2, setShowPart2] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
+    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 md:gap-8">
       {/* Section label */}
       <div className="flex items-center gap-4">
         <span className="text-[10px] uppercase tracking-[0.45em] text-white/30 font-mono font-light">
@@ -90,7 +90,7 @@ function HeaderRow() {
       </div>
 
       {/* Big heading */}
-      <h2 className="text-[clamp(2.2rem,6vw,4.5rem)] tracking-tight leading-[0.95] text-foreground flex flex-col md:block">
+      <h2 className="text-[clamp(2.2rem,min(6vw,8vh),4.5rem)] tracking-tight leading-[0.95] text-foreground flex flex-col md:block">
         <span className="font-normal font-mono">
           <TypewriterText text="How We" speed={40} delay={400} onComplete={() => setShowPart2(true)} />
         </span>{' '}
@@ -114,14 +114,14 @@ function PillarRow({
       {/* Separator line */}
       <div className="w-full h-px bg-white/8" />
 
-      <div className="flex items-center justify-between py-4 md:py-5 cursor-default group-hover:px-2 transition-all duration-500">
+      <div className="flex items-center justify-between py-3 md:py-4 cursor-default group-hover:px-2 transition-all duration-500">
         {/* Number */}
         <span className="text-[11px] md:text-[12px] uppercase tracking-[0.35em] text-white/25 font-mono w-10 flex-shrink-0">
           {pillar.num}
         </span>
 
         {/* Title */}
-        <p className="flex-1 mx-6 md:mx-10 text-[clamp(1.1rem,2.8vw,2.4rem)] font-light tracking-tight text-foreground leading-none group-hover:text-white transition-colors duration-300">
+        <p className="flex-1 mx-6 md:mx-10 text-[clamp(1.1rem,min(2.8vw,4vh),2.4rem)] font-light tracking-tight text-foreground leading-none group-hover:text-white transition-colors duration-300">
           {pillar.title}
         </p>
 
@@ -156,14 +156,14 @@ function CTARow({
   navigate: ReturnType<typeof useNavigate>;
 }) {
   return (
-    <div className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-2">
+    <div className="mt-6 md:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-2">
       <motion.a
         href="/about"
         onClick={(e) => {
           e.preventDefault();
           navigate('/about');
         }}
-        className="w-full sm:w-auto text-center py-4 px-10 bg-foreground text-background text-[11px] uppercase tracking-[0.3em] font-medium border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
+        className="w-full sm:w-auto text-center py-3 px-10 bg-foreground text-background text-[11px] uppercase tracking-[0.3em] font-medium border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
         whileTap={{ scale: 0.98 }}
       >
         <span className="relative z-10">About Us</span>
@@ -175,7 +175,7 @@ function CTARow({
           e.preventDefault();
           navigate('/work');
         }}
-        className="w-full sm:w-auto text-center py-4 px-10 border border-foreground/30 text-muted-foreground text-[11px] uppercase tracking-[0.3em] font-medium hover:border-foreground hover:text-foreground transition-all duration-300"
+        className="w-full sm:w-auto text-center py-3 px-10 border border-foreground/30 text-muted-foreground text-[11px] uppercase tracking-[0.3em] font-medium hover:border-foreground hover:text-foreground transition-all duration-300"
         whileTap={{ scale: 0.98 }}
       >
         <span className="relative z-10">View our work</span>

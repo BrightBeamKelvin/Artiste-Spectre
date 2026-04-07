@@ -11,6 +11,7 @@ interface TypewriterTextProps {
   highlightClassName?: string;
   trigger?: boolean;
   wrap?: boolean;
+  fixedPositioning?: boolean;
 }
 
 export const TypewriterText = ({
@@ -22,7 +23,8 @@ export const TypewriterText = ({
   highlightWords = [],
   highlightClassName = 'selection-highlight',
   trigger = true,
-  wrap = false
+  wrap = false,
+  fixedPositioning = false
 }: TypewriterTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
@@ -104,6 +106,11 @@ export const TypewriterText = ({
             {typedSegment}
           </span>
           {shouldShowCursorHere && cursor}
+          {fixedPositioning && (
+            <span className="opacity-0 select-none pointer-events-none" aria-hidden="true">
+              {untypedSegment}
+            </span>
+          )}
         </span>
       );
     });

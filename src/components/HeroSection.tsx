@@ -196,26 +196,26 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
                   <div className={isMobileLayout ? "flex flex-col w-full" : ""}>
                     {isMobileLayout ? (
                       /* ── Mobile Typography: Left-Aligned Editorial ── */
-                      <div className="flex flex-col w-full mb-6">
-                        <h2 className="text-[11vw] sm:text-[10vw] font-mono font-light tracking-tight text-white/90 leading-none mb-3">
-                          <TypewriterText text="Production" delay={300} speed={40} trigger={isViewfinderReady} wrap={true} onComplete={() => setShowPart2(true)} />
+                      <div className="flex flex-col w-full mb-2">
+                        <h2 className="text-[min(9vw,6vh)] sm:text-[min(10vw,7vh)] font-mono font-light tracking-tight text-white/90 leading-none mb-2">
+                          <TypewriterText text="Production" delay={300} speed={40} trigger={isViewfinderReady} wrap={true} onComplete={() => setShowPart2(true)} fixedPositioning={true} />
                         </h2>
-                        <p className="text-[4.2vw] sm:text-[3.8vw] font-sans font-light text-white/40 uppercase tracking-[0.3em] mb-4 pl-1">
-                          <TypewriterText text="for Brands that" delay={0} speed={40} trigger={showPart2} wrap={true} onComplete={() => setShowPart3(true)} />
+                        <p className="text-[min(3.8vw,3vh)] font-sans font-light text-white/40 uppercase tracking-[0.3em] mb-3 pl-1">
+                          <TypewriterText text="for Brands that" delay={0} speed={40} trigger={showPart2} wrap={true} onComplete={() => setShowPart3(true)} fixedPositioning={true} />
                         </p>
-                        <div className="flex flex-col -space-y-[2vw]">
-                          <h1 className="text-[22vw] sm:text-[20vw] font-sans font-light text-white leading-[0.85] tracking-tighter">
-                            <TypewriterText text="Define" delay={0} speed={35} trigger={showPart3} wrap={true} onComplete={() => setShowPart4(true)} />
+                        <div className="flex flex-col -space-y-[1vh]">
+                          <h1 className="text-[min(18vw,11vh)] sm:text-[min(20vw,12vh)] font-sans font-light text-white leading-[0.85] tracking-tighter">
+                            <TypewriterText text="Define" delay={0} speed={35} trigger={showPart3} wrap={true} onComplete={() => setShowPart4(true)} fixedPositioning={true} />
                           </h1>
-                          <h1 className="text-[22vw] sm:text-[20vw] font-sans font-light text-white leading-[0.85] tracking-tighter">
-                            <TypewriterText text="Culture." delay={0} speed={40} trigger={showPart4} wrap={true} onComplete={() => setShowSubtext(true)} />
+                          <h1 className="text-[min(18vw,11vh)] sm:text-[min(20vw,12vh)] font-sans font-light text-white leading-[0.85] tracking-tighter">
+                            <TypewriterText text="Culture." delay={0} speed={40} trigger={showPart4} wrap={true} onComplete={() => setShowSubtext(true)} fixedPositioning={true} />
                           </h1>
                         </div>
                       </div>
                     ) : (
                       /* ── Original Desktop Typography Layer ── */
-                      <div className="mb-4 md:mb-[4vh] w-full relative" ref={containerRef}>
-                        <h1 className="text-[7.5vw] lg:text-[6.2vw] xl:text-[84px] leading-[1.08] text-left font-normal tracking-tight font-mono whitespace-nowrap">
+                      <div className="mb-2 md:mb-[3vh] w-full relative" ref={containerRef}>
+                        <h1 className="text-[min(7.5vw,9vh)] lg:text-[min(6.2vw,8.5vh)] xl:text-[min(84px,9vh)] leading-[1.08] text-left font-normal tracking-tight font-mono whitespace-nowrap">
                           <TypewriterText 
                             text={"High\u2009Impact Production"} 
                             delay={300} 
@@ -226,8 +226,8 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
                           />
                         </h1>
 
-                        <div className="mt-8 flex justify-end relative w-full">
-                          <h1 className="text-[6.2vw] lg:text-[5.2vw] xl:text-[68px] leading-[1.1] font-light tracking-tight flex flex-wrap justify-end w-full font-sans text-white/70 gap-[0.3em] text-right">
+                        <div className="mt-4 md:mt-6 flex justify-end relative w-full">
+                          <h1 className="text-[min(6.2vw,8vh)] lg:text-[min(5.2vw,7.5vh)] xl:text-[min(68px,8vh)] leading-[1.1] font-light tracking-tight flex flex-wrap justify-end w-full font-sans text-white/70 gap-[0.3em] text-right">
                             <span className="inline"><TypewriterText text={"for"} delay={100} speed={30} trigger={showPart3} wrap={true} onComplete={() => setShowPart4(true)} /></span>
                             <span className="inline font-mono"><TypewriterText text={"Culture\u2009Defining"} delay={0} speed={30} trigger={showPart4} wrap={true} onComplete={() => setShowPart5(true)} className="italic" /></span>
                             <span className="inline font-sans"><TypewriterText text={"Brands."} delay={0} speed={30} trigger={showPart5} wrap={true} onComplete={() => setShowSubtext(true)} /></span>
@@ -239,8 +239,7 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
                     <motion.div 
                       initial={{ opacity: 0 }} 
                       animate={{ opacity: showSubtext ? 1 : 0 }} 
-                      transition={{ duration: 0.9, delay: 0.4 }} 
-                      className={`md:max-w-2xl md:mt-[12vh] ${isMobileLayout ? 'flex flex-col w-full ml-0 mr-auto md:pb-0' : 'mt-2 sm:mt-12 text-right ml-auto mr-0'}`}
+                      className={`md:max-w-2xl md:mt-[6vh] ${isMobileLayout ? 'flex flex-col w-full ml-0 mr-auto md:pb-0' : 'mt-2 sm:mt-5 text-right ml-auto mr-0'}`}
                     >
                       <p className={`hidden md:block leading-relaxed text-muted-foreground font-light ${isLocked ? '!text-[14px]' : 'text-sm sm:text-base md:text-lg lg:text-xl'}`}>
                         Building digital first campaigns powered by <br className={isLocked ? 'block' : 'hidden'} /> curated talent and strategic execution.
@@ -249,7 +248,7 @@ export const HeroSection = ({ scrollProgress, targetRect }: HeroSectionProps) =>
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: showSubtext ? 1 : 0 }} 
                         transition={{ duration: 0.8, delay: 1.0 }} 
-                        className={`flex flex-col sm:flex-row w-full ${isMobileLayout ? 'mt-3 justify-start items-stretch' : 'mt-5 sm:mt-6 md:mt-[5vh] justify-end items-end sm:items-center'} ${isLocked ? '!gap-4' : 'gap-2.5 md:gap-6'}`}
+                        className={`flex flex-col sm:flex-row w-full ${isMobileLayout ? 'mt-2 justify-start items-stretch' : 'mt-4 sm:mt-5 md:mt-[4vh] justify-end items-end sm:items-center'} ${isLocked ? '!gap-3' : 'gap-2 md:gap-5'}`}
                       >
                         <motion.a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }} className={`w-full sm:w-auto text-center py-4 md:py-3.5 bg-foreground text-background uppercase hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300 font-medium whitespace-nowrap tracking-[0.3em] ${isLocked ? '!text-[12px] !px-6' : 'text-[12px] md:text-[14px] px-6 md:px-8'}`} whileTap={{ scale: 0.97 }}>Book a Discovery Call</motion.a>
                         <motion.a href="/work" onClick={(e) => { e.preventDefault(); navigate('/work'); }} className={`w-full sm:w-auto text-center py-4 md:py-3.5 border border-foreground/30 text-muted-foreground uppercase hover:border-foreground hover:text-foreground transition-all duration-300 font-medium whitespace-nowrap tracking-[0.3em] ${isLocked ? '!text-[12px] !px-6' : 'text-[12px] md:text-[14px] px-6 md:px-8'}`} whileTap={{ scale: 0.97 }}>View Work</motion.a>

@@ -4,18 +4,28 @@ import { RevealText } from '@/components/RevealText';
 
 import { TypewriterText } from '@/components/TypewriterText';
 
+const HARDEN_VIDEOS = [
+  "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20James%201.mp4",
+  "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20james%202.mp4",
+  "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20james%203.mp4"
+].map(url => url.replace(/ /g, '%20').replace(/\|/g, '%7C'));
+
 const BLOB_MEDIA = {
   jordan: "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Nike%20%7C%20Jordan%20/instagram_DHl8Z0_ywn__mute.mp4",
-  harden: "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/1.mp4",
+  harden: HARDEN_VIDEOS[0], // Base case, but we'll randomize in the component
   onyx: "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Onyx%20E-bike/1.mp4",
   jumpman: "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Nike%20%7C%20Jumpman/1.mp4",
-  alison: "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Alison%20Wonderland/alison%201.mp4",
+  alison: HARDEN_VIDEOS[1], // Replacing old alison video
   renee: "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Renee%20Rapp%202/renee%201.jpg",
 };
 
 const About = () => {
   const containerRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Randomize videos on mount
+  const hardenVideo = useRef(HARDEN_VIDEOS[Math.floor(Math.random() * HARDEN_VIDEOS.length)]);
+  const alisonReplacementVideo = useRef(HARDEN_VIDEOS[(Math.floor(Math.random() * (HARDEN_VIDEOS.length - 1)) + 1) % HARDEN_VIDEOS.length]);
 
   const handleVideoEnded = () => {
     if (videoRef.current) {
@@ -115,7 +125,7 @@ const About = () => {
             className="w-full aspect-square md:aspect-[21/9] mb-16 overflow-hidden relative group"
           >
             <motion.video 
-              src={BLOB_MEDIA.harden} 
+              src={hardenVideo.current} 
               autoPlay loop muted playsInline 
               className="w-full h-full object-cover"
               initial={{ filter: 'grayscale(100%)' }}
@@ -154,7 +164,7 @@ const About = () => {
             {[
               { step: '01', title: 'End to End Production Execution', desc: 'Delivering commercial grade visual storytelling and campaigns with scalable infrastructure.', media: BLOB_MEDIA.jumpman, mediaType: 'video', align: 'right' },
               { step: '02', title: 'Strategic Narrative Development', desc: 'Structuring campaigns and creative direction that position brands as cultural leaders.', media: BLOB_MEDIA.renee, mediaType: 'image', align: 'left' },
-              { step: '03', title: 'Creator and Talent Management', desc: 'Curating partnerships and talent ecosystems built for authentic audience resonance.', media: BLOB_MEDIA.alison, mediaType: 'video', align: 'right' },
+              { step: '03', title: 'Creator and Talent Management', desc: 'Curating partnerships and talent ecosystems built for authentic audience resonance.', media: alisonReplacementVideo.current, mediaType: 'video', align: 'right' },
               { step: '04', title: 'Audience Activation & Distribution', desc: 'Executing digital and experiential moments that scale reach and drive performance.', media: BLOB_MEDIA.onyx, mediaType: 'video', align: 'left' },
             ].map((item, index) => (
               <div key={index} className={`flex flex-col gap-16 md:gap-24 md:flex-row ${item.align === 'left' ? 'md:flex-row-reverse' : ''} items-center`}>

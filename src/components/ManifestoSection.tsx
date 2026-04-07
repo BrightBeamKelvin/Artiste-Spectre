@@ -50,7 +50,7 @@ const RotatingManifesto = ({ trigger }: { trigger: boolean }) => {
   }, [displayText, isDeleting, index, pause, trigger]);
 
   return (
-    <div className="text-[7.5vw] font-light leading-tight tracking-tight px-2 text-center h-[12vh] flex items-center justify-center">
+    <div className="text-[min(7.5vw,10vh)] font-light leading-tight tracking-tight px-2 text-center h-[12vh] flex items-center justify-center">
       <span className="relative">
         {displayText}
         <motion.span
@@ -63,6 +63,12 @@ const RotatingManifesto = ({ trigger }: { trigger: boolean }) => {
   );
 };
 
+const HERO_VIDEOS = [
+  "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20James%201.mp4",
+  "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20james%202.mp4",
+  "https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Brand%20Work/Adidas%20%7C%20James%20Harden/Adidas%20james%203.mp4"
+].map(url => url.replace(/ /g, '%20').replace(/\|/g, '%7C'));
+
 interface ManifestoSectionProps {
   scrollProgress: MotionValue<number>;
   onTargetMeasure?: (rect: DOMRect) => void;
@@ -73,6 +79,7 @@ export const ManifestoSection = ({ scrollProgress, onTargetMeasure }: ManifestoS
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isActive, setIsActive] = useState(false);
   const [textActive, setTextActive] = useState(false);
+  const [videoSrc] = useState(() => HERO_VIDEOS[Math.floor(Math.random() * HERO_VIDEOS.length)]);
 
   const [windowWidth, setWindowWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1440);
   const isLocked = windowWidth >= 765 && windowWidth <= 1311;
@@ -145,19 +152,19 @@ export const ManifestoSection = ({ scrollProgress, onTargetMeasure }: ManifestoS
           <NetCanvas className="w-full h-full opacity-40" />
         </div>
       )}
-      <div className="w-full h-[100svh] flex flex-col px-6 md:px-12 pt-16 md:pt-32 pb-8 md:pb-32 mx-auto max-w-[90rem]">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12 w-full h-full ml-auto">
-          <div className="order-2 md:order-1 w-full md:w-auto w-[85%] min-[400px]:w-[95%] max-w-sm sm:max-w-md mx-auto md:max-w-xl md:mx-0 relative z-[60]">
-            <div ref={targetRef} className="relative w-full max-w-xl overflow-hidden">
-              <motion.div style={{ opacity: mediaOpacity, x: mediaX }}>
+      <div className="w-full h-[100svh] flex flex-col px-6 md:px-12 pt-16 md:pt-20 pb-6 md:pb-16 mx-auto max-w-[90rem]">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-12 w-full h-full min-h-0 ml-auto">
+          <div className="order-2 md:order-1 flex justify-center md:justify-center w-full md:w-1/2 relative z-[60] min-h-0 flex-shrink h-[50svh] md:h-full md:max-h-full">
+            <div ref={targetRef} className="relative h-full aspect-[9/16] overflow-hidden shadow-2xl md:ml-auto md:mr-8 lg:mr-16">
+              <motion.div style={{ opacity: mediaOpacity, x: mediaX }} className="w-full h-full relative">
                 <video
                   ref={videoRef}
-                  src="https://cjortzrbfxpqnq4i.public.blob.vercel-storage.com/Album%20Covers/Alison%20Wonderland/alison%201.mp4"
+                  src={videoSrc}
                   autoPlay
                   muted
                   loop
                   playsInline
-                  className="w-full h-auto shadow-2xl"
+                  className="w-full h-full object-cover"
                 />
               </motion.div>
               <div className="absolute inset-0 bg-background/5 mix-blend-overlay pointer-events-none" />
