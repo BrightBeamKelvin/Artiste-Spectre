@@ -7,7 +7,7 @@ import { NetCanvas } from './NetCanvas';
 const manifestoLines = [
   "We build culture with intention.",
   "Machina delivers high quality, digital first campaigns.",
-  "We believe influence is built through strategy, precision, and execution.",
+  "We build influence through strategy, precision and execution.",
 ];
 
 const RotatingManifesto = ({ trigger }: { trigger: boolean }) => {
